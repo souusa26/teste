@@ -1,0 +1,99 @@
+# Cole como cartão manual numa aba nova em modo painel.
+# Antes de incluir o cartão, crie input_boolean.luz_virtual_quarto_1.
+# Confirme todos os IDs de entidades em Ferramentas de desenvolvedor > Estados.
+# Distâncias pressupõem que o arquivo OBJ esteja em METROS.
+type: custom:floor3d-card
+name: Apartamento 3D
+path: /local/planta3d/
+objfile: apartamento.obj
+mtlfile: apartamento.mtl
+header: 'no'
+click: 'yes'
+lock_camera: 'no'
+backgroundColor: '#22242a'
+globalLightPower: '0.30'
+shadow: 'yes'
+extralightmode: 'yes'
+sky: 'no'
+entities:
+  - entity: switch.luzes_da_sala_switch_1
+    object_id: obj_luz_sala_1
+    type3d: light
+    action: default
+    light:
+      color: '#ffffff'
+      lumens: '800'
+      distance: '4.5'
+      shadow: 'yes'
+      vertical_alignment: bottom
+  - entity: switch.luzes_da_sala_switch_2
+    object_id: obj_luz_sala_2
+    type3d: light
+    action: default
+    light:
+      color: '#ffffff'
+      lumens: '800'
+      distance: '4.5'
+      shadow: 'yes'
+      vertical_alignment: bottom
+  - entity: light.luz_da_cozinha
+    object_id: obj_luz_cozinha
+    type3d: light
+    action: default
+    light:
+      color: '#ffe1a0'
+      lumens: '700'
+      distance: '3.5'
+      shadow: 'yes'
+      vertical_alignment: bottom
+  - entity: switch.luz_do_corredor_switch_1
+    object_id: obj_luz_corredor
+    type3d: light
+    action: default
+    light:
+      color: '#ffffff'
+      lumens: '500'
+      distance: '2.8'
+      shadow: 'yes'
+      vertical_alignment: bottom
+  - entity: light.luz_do_quarto
+    object_id: obj_luz_quarto
+    type3d: light
+    action: default
+    light:
+      color: '#ffe1a0'
+      lumens: '700'
+      distance: '3.5'
+      shadow: 'yes'
+      vertical_alignment: bottom
+  - entity: input_boolean.luz_virtual_quarto_1
+    object_id: obj_luz_quarto_1
+    type3d: light
+    action: default
+    light:
+      color: '#ffe1a0'
+      lumens: '700'
+      distance: '3.5'
+      shadow: 'yes'
+      vertical_alignment: bottom
+  - entity: media_player.tv_samsung
+    object_id: obj_tv_sala
+    type3d: light
+    action: default
+    # Media players podem ter estados além de on, ex. playing e paused.
+    entity_template: '[[[ ["on", "playing", "paused", "idle", "buffering"].includes("$entity") ? "on" : "off" ]]]'
+    light:
+      color: '#287dff'
+      lumens: '120'
+      distance: '2.0'
+      shadow: 'no'
+  - entity: media_player.aoc_h302x_44b3
+    object_id: obj_tv_quarto
+    type3d: light
+    action: default
+    entity_template: '[[[ ["on", "playing", "paused", "idle", "buffering"].includes("$entity") ? "on" : "off" ]]]'
+    light:
+      color: '#ff902f'
+      lumens: '120'
+      distance: '2.0'
+      shadow: 'no'
