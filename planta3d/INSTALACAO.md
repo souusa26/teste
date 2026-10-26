@@ -27,7 +27,7 @@ Os arquivos são disponibilizados pelo Home Assistant em `/local/planta3d/`. Par
 1. Confirme que o `floor3d-card` que você já tem está disponível como recurso frontend do Home Assistant. O projeto de referência é [adizanni/floor3d-card](https://github.com/adizanni/floor3d-card); forks e versões diferentes podem apresentar comportamento distinto.
 2. Edite seu dashboard e crie uma **nova aba de teste**. Escolha o tipo **Painel** se disponível; ele acomoda um único cartão que ocupa a área da aba.
 3. Adicione um cartão **Manual**, cole todo o conteúdo de `cartao-floor3d.yaml`, revise os IDs das entidades e salve. Não cole esse bloco substituindo o YAML inteiro do seu dashboard existente.
-4. Atualize a página. Com o mouse, gire, aproxime e clique nas luminárias e nas telas. O clique chama o serviço `toggle` da entidade correspondente; o PS5 e o computador não possuem ações no cartão.
+4. Atualize a página. O YAML fornece uma altura explícita de 500 pixels (`style`) e reserva oito linhas no layout de seções (`grid_options`), para evitar que o cartão fique reduzido a uma linha. Com o mouse, gire, aproxime e clique nas luminárias e nas telas. O clique chama o serviço `toggle` da entidade correspondente; o PS5 e o computador não possuem ações no cartão.
 
 ## 4. Teste os estados
 
@@ -40,6 +40,7 @@ O cartão tenta criar luzes 3D; as cores, brilho, sombras e distâncias dependem
 
 ## Ajustes e diagnóstico
 
+- **Card reduzido a uma linha:** confira se o YAML contém `style: 'overflow: hidden; width: 100%; height: 500px; position: relative;'` e `grid_options` com `rows: 8` e `columns: full`. Salve e atualize a página.
 - **Card não aparece:** verifique se `floor3d-card` está instalado, carregado como recurso do dashboard e se não há erro no navegador.
 - **Modelo não carrega:** confirme os dois arquivos em `/config/www/planta3d/`, seus nomes e os acessos `/local/` do passo 2. Após substituir um arquivo, atualize a página ignorando cache.
 - **Luz não acompanha o dispositivo:** confira o ID, o estado em Ferramentas de desenvolvedor e o nome do objeto; ambos precisam existir. Para TVs, confira também a lista de estados no template.

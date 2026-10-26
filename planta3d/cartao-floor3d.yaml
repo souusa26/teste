@@ -4,6 +4,10 @@
 # Distâncias pressupõem que o arquivo OBJ esteja em METROS.
 type: custom:floor3d-card
 name: Apartamento 3D
+style: 'overflow: hidden; width: 100%; height: 500px; position: relative;'
+grid_options:
+  columns: full
+  rows: 8
 path: /local/planta3d/
 objfile: apartamento.obj
 mtlfile: apartamento.mtl
