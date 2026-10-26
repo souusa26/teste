@@ -54,12 +54,12 @@ illum 2
 newmtl colcha_setup
 Ns 90.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.450000 0.570000 0.260000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
+map_Kd textura_coberta.png
 
 newmtl cozinha_taupe
 Ns 90.000000
@@ -84,12 +84,12 @@ illum 2
 newmtl granito_preto
 Ns 490.000000
 Ka 0.100000 0.100000 0.100000
-Kd 0.070000 0.075000 0.080000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 3
+map_Kd textura_granito.png
 
 newmtl inox
 Ns 518.400024
@@ -134,12 +134,12 @@ illum 2
 newmtl madeira_mogno
 Ns 270.399994
 Ka 1.000000 1.000000 1.000000
-Kd 0.240000 0.090000 0.045000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
+map_Kd textura_madeira.png
 
 newmtl manta_verde
 Ns 90.000000
@@ -214,12 +214,12 @@ illum 2
 newmtl sofa_areia
 Ns 90.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.630000 0.610000 0.560000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
+map_Kd textura_sofa.png
 
 newmtl tecido_cadeira
 Ns 90.000000

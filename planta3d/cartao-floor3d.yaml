@@ -91,6 +91,11 @@ entities:
       lumens: '120'
       distance: '2.0'
       shadow: 'no'
+      angle: 65
+      light_direction:
+        x: -1
+        y: 0
+        z: 0
   - entity: media_player.aoc_h302x_44b3
     object_id: obj_tv_quarto
     type3d: light
@@ -101,3 +106,8 @@ entities:
       lumens: '120'
       distance: '2.0'
       shadow: 'no'
+      angle: 65
+      light_direction:
+        x: 0
+        y: 0
+        z: 1

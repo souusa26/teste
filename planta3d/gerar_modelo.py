@@ -32,6 +32,44 @@ M={
  'tecido':mat('tecido_cadeira',(.045,.045,.05)), 'rgb':mat('pc_rgb',(.22,.09,.62),.2,.25),
 }
 
+# Texturas compactas, geradas localmente e exportadas junto com o modelo OBJ.
+# Não dependem de serviços externos e podem ser substituídas por fotos reais.
+def texture(key, filename, fn):
+    n=192
+    image=bpy.data.images.new(filename, width=n, height=n, alpha=True)
+    data=[]
+    rng=random.Random(20)
+    for y in range(n):
+        for x in range(n):
+            c=fn(x/n,y/n,rng)
+            data.extend((max(0,min(1,c[0])),max(0,min(1,c[1])),max(0,min(1,c[2])),1.0))
+    image.pixels.foreach_set(data)
+    image.filepath_raw=os.path.join(OUT,filename)
+    image.file_format='PNG'
+    image.save()
+    image.filepath='//'+filename
+    nodes=M[key].node_tree.nodes
+    tex=nodes.new('ShaderNodeTexImage'); tex.image=image
+    M[key].node_tree.links.new(tex.outputs['Color'],nodes.get('Principled BSDF').inputs['Base Color'])
+
+def wood(u,v,r):
+    vein=0.5+0.5*math.sin(110*u+3*math.sin(v*12)+1.3*math.sin(v*36))
+    noise=(r.random()-.5)*.03
+    return (.21+.18*vein+noise,.085+.095*vein+noise,.038+.05*vein+noise)
+def granite(u,v,r):
+    n=r.random(); grain=.12 if n>.95 else (.04 if n>.78 else 0)
+    return (.06+grain,.06+grain,.065+grain)
+def blanket(u,v,r):
+    band=0.025*math.sin(u*350)+0.02*math.sin(v*320)
+    fold=0.06*math.sin(u*15+v*8)
+    return (.32+band+fold,.43+band+fold,.20+band*.7+fold*.6)
+def woven(u,v,r):
+    detail=.025*(math.sin(u*500)+math.sin(v*500))+(r.random()-.5)*.02
+    return (.58+detail,.56+detail,.51+detail)
+for args in [('madeira','textura_madeira.png',wood),('granito','textura_granito.png',granite),
+             ('setupcolcha','textura_coberta.png',blanket),('sofa','textura_sofa.png',woven)]:
+    texture(*args)
+
 def cube(name, xyz, dims, material, bevel=0):
     bpy.ops.mesh.primitive_cube_add(size=1, location=xyz); o=bpy.context.object; o.name=name
     o.dimensions=dims; bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
@@ -47,6 +85,34 @@ def cylinder(name,xyz,r,depth,material,vertices=24,rot=None):
 def sphere(name,xyz,scale,material):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=12,ring_count=6,location=xyz); o=bpy.context.object; o.name=name
     o.scale=scale; bpy.ops.object.transform_apply(location=False,rotation=False,scale=True); o.data.materials.append(M[material]); return o
+def ring(name,xyz,major,minor,material,scale=(1,1,1),rot=(0,0,0)):
+    bpy.ops.mesh.primitive_torus_add(major_radius=major,minor_radius=minor,major_segments=32,minor_segments=10,location=xyz,rotation=rot)
+    o=bpy.context.object; o.name=name; o.scale=scale
+    bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
+    o.data.materials.append(M[material]); return o
+
+def quilt(name,x,y,z,w,d,material,wrinkle=.018):
+    # Superfície com pequenas dobras e UV próprio, para evitar uma colcha em bloco.
+    nx,ny=16,24
+    vertices=[]; faces=[]
+    for j in range(ny+1):
+        for i in range(nx+1):
+            u=i/nx; v=j/ny
+            h=wrinkle*(.45*math.sin(u*17+v*8)+.35*math.sin(v*24-u*3)+.2*math.sin(u*31+v*15))
+            vertices.append((x+w*u,y+d*v,z+h))
+    for j in range(ny):
+        for i in range(nx):
+            a=j*(nx+1)+i; faces.append((a,a+1,a+nx+2,a+nx+1))
+    mesh=bpy.data.meshes.new(name); mesh.from_pydata(vertices,[],faces); mesh.update()
+    o=bpy.data.objects.new(name,mesh); bpy.context.collection.objects.link(o); o.data.materials.append(M[material])
+    uv=mesh.uv_layers.new(name='UVMap')
+    for polygon in mesh.polygons:
+        for li in polygon.loop_indices:
+            vi=mesh.loops[li].vertex_index; uv.data[li].uv=((vi%(nx+1))/nx,(vi//(nx+1))/ny)
+    for polygon in mesh.polygons: polygon.use_smooth=True
+    solid=o.modifiers.new('espessura','SOLIDIFY'); solid.thickness=.012
+    bpy.context.view_layer.objects.active=o; bpy.ops.object.modifier_apply(modifier='espessura')
+    return o
 
 # Lajes e cerâmica com linhas de rejunte discretas.
 box('laje',0,0,-.09,6.50,7.80,.09,'parede')
@@ -73,7 +139,7 @@ def wally(x,y1,y2,door=None,window=None):
                 if d>c: box('parede',x-T/2,c,.025,T,d-c,H,'parede',.006)
             box('peitoril_parede',x-T/2,window[0],.025,T,window[1]-window[0],.735,'parede')
         elif b>a: box('parede',x-T/2,a,.025,T,b-a,H,'parede',.006)
-wallx(0,3.30,0,window=(1.9,3.05)); wallx(3.30,6.50,0,(5.55,6.35))
+wallx(0,3.30,0,window=(.25,1.40)); wallx(3.30,6.50,0,(5.55,6.35))
 wallx(0,1.80,3.00); wallx(1.80,3.30,3.00,(2.20,3.00))
 wallx(0,3.30,4.80,(2.20,3.00))
 wallx(0,3.30,7.80,window=(1.0,2.15)); wallx(3.30,6.50,7.80,window=(4.25,5.70))
@@ -100,9 +166,12 @@ def window_y(name,x,y,w):
     box(name+'_vidro',x-.018,y,.80,.036,w,.48,'vidro')
     for yy in (y,y+w/2,y+w-.035): box(name+'_perfil',x-.025,yy,.76,.05,.035,.52,'moldura')
     box(name+'_peitoril',x-.03,y,.76,.06,w,.035,'moldura')
-window_x('janela_setup',1.9,0,1.15); window_x('janela_quarto',1.0,7.80,1.15)
+window_x('janela_setup',.25,0,1.15); window_x('janela_quarto',1.0,7.80,1.15)
 window_x('janela_cozinha',4.25,7.80,1.45); window_y('janela_sala',6.50,3.2,1.2)
 window_y('janela_banheiro',0,3.62,.6)
+# Persiana da janela do outro quarto, com lâminas horizontais visíveis.
+for z in [0.81+i*.055 for i in range(8)]:
+    box('persiana_quarto',1.02,7.77,z,1.10,.025,.012,'moldura')
 
 # Sala: aparador, vaso e sofá com almofadas.
 box('aparador_corpo',3.62,.12,.04,.85,.37,.72,'creme',.01)
@@ -116,13 +185,20 @@ box('sofa_base',3.72,.63,.06,.76,1.84,.29,'sofa',.06)
 box('sofa_assento',3.78,.69,.35,.67,1.70,.19,'sofa',.06)
 box('sofa_encosto',3.71,.63,.36,.20,1.84,.65,'sofa',.05)
 for y in (.63,2.29): box('sofa_braco',3.72,y,.36,.76,.18,.32,'sofa',.04)
-for i,y in enumerate((.86,1.34,1.82)): box('almofada',3.94,y,.56,.18,.30,.28,'mostarda' if i==1 else 'verdeagua',.045)
-box('manta',4.15,1.34,.54,.27,.70,.025,'verde')
+for i,y in enumerate((.86,1.34,1.82)):
+    o=box('almofada',3.94,y,.56,.18,.30,.28,'mostarda' if i==1 else 'verdeagua',.075)
+    o.rotation_euler.y=.14 if i==0 else -.10
+for y in (1.03,1.61): box('costura_sofa',3.78,y,.536,.66,.009,.008,'creme')
+quilt('manta_sofa',4.13,1.32,.56,.30,.72,'verde',.025)
+for y in (1.42,1.55,1.68,1.81,1.94): box('xadrez_manta',4.14,y,.576,.28,.008,.006,'verdeagua')
 # Mesa centro e estante da TV.
 box('mesa_centro_base',4.63,1.00,.05,.48,.86,.38,'escuro')
 box('mesa_centro_vidro',4.58,.95,.43,.58,.96,.035,'vidro',.01)
+for x in (4.60,5.08):
+    for y in (.97,1.85): box('perna_mesa_centro',x,y,.045,.035,.035,.37,'inox',.008)
 box('painel_tv',6.35,.56,.03,.10,1.90,1.85,'madeira')
 box('rack_tv',6.10,.58,.04,.26,1.86,.46,'creme',.015)
+for y in [0.62+i*.045 for i in range(40)]: box('detalhe_canelado_rack',6.075,y,.08,.018,.016,.35,'moldura',.004)
 box('moldura_tv_sala',6.27,.80,.78,.075,1.28,.77,'escuro',.01)
 box('obj_tv_sala',6.25,.83,.81,.025,1.22,.71,'teladesligada')
 box('ps5_centro',6.12,.70,.53,.12,.26,.08,'escuro')
@@ -142,29 +218,44 @@ for x,y in ((5.18,3.14),(5.76,3.14),(5.18,4.32),(5.76,4.32)):
 box('cristaleira',5.22,5.05,.04,.72,.40,1.75,'madeira2',.015)
 box('cristaleira_frente',5.25,5.02,.35,.66,.025,1.35,'vidro')
 for z in (.47,.80,1.13,1.46): box('cristaleira_prateleira',5.25,5.04,z,.66,.36,.025,'madeira')
+for z in (.50,.83,1.16,1.49):
+    for x in (5.35,5.52,5.69):
+        cylinder('louca_cristaleira',(x,5.20,z+.045),.045,.09,'loucabranca',16)
 
 # Cozinha e lavanderia: armários, bancada, eletrodomésticos.
 box('geladeira',3.43,4.97,.03,.63,.64,1.72,'inox',.02)
 box('porta_geladeira',3.41,4.99,.09,.025,.60,1.05,'inox')
 box('geladeira_puxador',3.37,5.08,.75,.04,.05,.49,'escuro',.006)
 box('armario_pia',3.43,5.72,.03,.60,1.05,.82,'taupe')
+for y in (5.75,6.26):
+    box('frente_armario_cozinha',4.032,y,.10,.018,.47,.68,'taupe',.006)
+    box('puxador_armario_cozinha',4.055,y+.10,.69,.035,.25,.025,'inox',.007)
 box('bancada_cozinha',3.39,5.69,.85,.67,1.11,.05,'granito')
-box('cuba_cozinha',3.48,5.90,.90,.45,.55,.018,'inox')
+box('cuba_cozinha',3.48,5.90,.901,.45,.55,.016,'inox',.035)
+box('interior_cuba',3.52,5.94,.919,.37,.47,.006,'escuro',.045)
+box('fundo_cuba',3.55,5.97,.922,.31,.41,.005,'inox',.04)
 cylinder('torneira_cozinha',(3.47,6.10,1.03),.025,.25,'inox',12)
+cylinder('bica_torneira',(3.57,6.10,1.14),.018,.21,'inox',12,(0,math.pi/2,0))
 box('armario_aereo',3.42,5.75,1.45,.38,.98,.62,'taupe')
 for yy in (5.78,6.25): box('porta_armario',3.40,yy,1.48,.03,.42,.56,'creme')
 box('fogao_corpo',3.44,6.90,.03,.60,.55,.82,'loucabranca',.015)
 box('fogao_tampo',3.43,6.89,.85,.62,.57,.04,'granito')
+box('porta_forno',4.045,6.93,.18,.02,.45,.48,'escuro',.01)
+box('puxador_forno',4.075,6.98,.69,.025,.36,.025,'inox',.006)
 for xx in (3.58,3.89):
     for yy in (7.04,7.30): cylinder('boca_fogao',(xx,yy,.90),.075,.015,'escuro',16)
 box('maquina_lavar',4.22,7.06,.03,.62,.61,.89,'loucabranca',.02)
 cylinder('porta_maquina',(4.54,7.045,.53),.20,.025,'escuro',24,(math.pi/2,0,0))
+cylinder('vidro_maquina',(4.54,7.025,.53),.145,.018,'vidro',24,(math.pi/2,0,0))
+for x in (4.30,4.40,4.51): cylinder('botao_maquina',(x,7.035,.82),.018,.015,'escuro',12,(math.pi/2,0,0))
 box('tanque',4.93,7.13,.03,.60,.55,.83,'loucabranca')
 box('cuba_tanque',4.99,7.18,.86,.47,.42,.025,'inox')
 
 # Banheiro: vaso, nichos, bancada e box.
-box('vaso_base',.17,3.82,.03,.38,.52,.34,'loucabranca',.07)
-box('vaso_assento',.19,3.78,.37,.34,.48,.06,'loucabranca',.05)
+sphere('vaso_base',(.35,4.05,.21),(.19,.23,.19),'loucabranca')
+sphere('vaso_taça',(.35,3.99,.35),(.24,.30,.16),'loucabranca')
+ring('vaso_assento',(.35,3.98,.47),.16,.025,'loucabranca',scale=(1.08,1.38,1))
+sphere('agua_vaso',(.35,3.98,.465),(.12,.16,.008),'vidro')
 box('vaso_caixa',.10,4.21,.35,.32,.18,.39,'loucabranca',.02)
 for z in (.95,1.17,1.39): box('nicho_banheiro',.06,3.80,z,.20,.50,.08,'creme')
 box('bancada_banheiro',.12,3.12,.76,.52,.48,.08,'granito')
@@ -173,6 +264,11 @@ box('espelho_banheiro',.08,3.15,.97,.025,.40,.50,'inox')
 box('piso_box',1.05,3.86,.035,.69,.80,.025,'creme')
 box('vidro_box',1.04,3.86,.06,.025,.80,1.45,'vidro')
 for y in (3.86,4.64): box('perfil_box',1.02,y,.06,.045,.035,1.45,'escuro')
+# Faixas de rejunte sugerem os azulejos do banheiro, conforme o vídeo.
+for z in (.30,.60,.90,1.20): box('rejunte_banheiro',.055,3.05,z,.008,1.68,.005,'rejunte')
+for y in [3.15+i*.30 for i in range(6)]: box('rejunte_banheiro',.055,y,.06,.008,.005,1.22,'rejunte')
+cylinder('chuveiro_haste',(.24,4.57,1.57),.018,.25,'inox',12)
+sphere('chuveiro',(.24,4.57,1.46),(.10,.10,.04),'inox')
 
 # Quarto do vídeo: cama, cabeceira, roupa de cama e guarda-roupa.
 box('guarda_roupa_quarto_1',.12,5.11,.03,.53,2.35,2.08,'creme',.01)
@@ -181,31 +277,45 @@ for i in range(6):
     box('puxador_roupeiro',.67,y+.29,1.0,.02,.025,.11,'inox')
 box('cama_quarto_1',1.75,5.50,.03,1.40,1.85,.35,'madeira')
 box('colchao_quarto_1',1.77,5.52,.38,1.36,1.81,.22,'colcha',.035)
-box('coberta_quarto_1',1.78,5.55,.60,.98,1.75,.025,'colcha')
+quilt('coberta_quarto_1',1.78,5.55,.61,.98,1.75,'colcha',.025)
 box('cabeceira_quarto_1',3.07,5.48,.03,.10,1.90,1.05,'madeira')
 for y in (5.73,6.59): box('travesseiro_quarto_1',2.77,y,.63,.25,.56,.10,'vermelho',.04)
 
-# Quarto setup: guarda-roupa à esquerda de quem entra, cama junto à janela.
-box('guarda_roupa_setup',.12,.16,.03,.53,2.65,2.10,'creme',.01)
+# Quarto setup: olhando da porta para dentro (-Y), esquerda corresponde a +X.
+# A posição da cama e da janela foi espelhada; a porta e a TV não mudam.
+box('guarda_roupa_setup',2.65,.16,.03,.53,2.12,2.10,'creme',.01)
 for i in range(5):
-    y=.20+i*.51; box('porta_roupeiro_setup',.65,y,.10,.018,.49,1.90,'moldura')
-    box('puxador_setup',.67,y+.40,1.01,.02,.025,.12,'inox')
-box('cama_setup_base',1.72,.15,.03,1.40,1.95,.32,'creme')
-box('cama_setup_colchao',1.74,.17,.35,1.36,1.91,.22,'colcha',.035)
-box('cama_setup_coberta',1.76,.48,.57,1.32,1.43,.025,'setupcolcha')
-box('cabeceira_setup',1.72,.10,.03,1.40,.08,.80,'madeira2')
-for x in (1.90,2.52): box('travesseiro_setup',x,.25,.60,.49,.26,.11,'colcha',.035)
+    y=.20+i*.405; box('porta_roupeiro_setup',2.63,y,.10,.018,.39,1.90,'moldura')
+    box('puxador_setup',2.59,y+.31,1.01,.035,.025,.12,'inox',.006)
+box('cama_setup_base',.18,.15,.03,1.40,1.95,.32,'creme',.025)
+box('cama_setup_colchao',.20,.17,.35,1.36,1.91,.22,'colcha',.055)
+quilt('cama_setup_coberta',.22,.48,.63,1.32,1.43,'setupcolcha',.035)
+box('cabeceira_setup',.18,.10,.03,1.40,.08,.80,'madeira2')
+for x in (.34,.96):
+    box('travesseiro_setup',x,.25,.60,.49,.26,.11,'colcha',.065)
+    box('costura_travesseiro',x+.02,.26,.705,.45,.22,.008,'creme',.015)
 box('mesa_setup',1.06,2.36,.73,1.15,.52,.045,'escuro')
 for x in (1.10,2.12): box('perna_mesa_setup',x,2.40,.03,.05,.44,.70,'escuro')
 for x in (1.10,1.64):
     box('monitor_setup',x,2.68,.89,.48,.045,.32,'escuro',.01)
+    box('tela_monitor',x+.015,2.665,.91,.45,.008,.28,'teladesligada')
     box('pe_monitor',x+.19,2.61,.77,.10,.13,.12,'escuro')
+box('teclado',1.34,2.39,.785,.57,.18,.025,'escuro',.01)
+for i in range(12):
+    for j in range(3): box('tecla',1.36+i*.043,2.41+j*.045,.81,.033,.033,.008,'creme',.003)
+sphere('mouse',(1.99,2.43,.80),(.045,.075,.025),'escuro')
+box('tapete_mouse',1.88,2.37,.78,.23,.22,.006,'tecido')
 box('pc_gabinete',2.13,2.48,.78,.24,.37,.48,'escuro',.015)
 for z in (.86,1.00,1.14): cylinder('ventoinha_rgb',(2.14,2.53,z),.047,.02,'rgb',16,(0,math.pi/2,0))
-box('cadeira_assento',1.44,1.80,.45,.48,.48,.12,'tecido',.05)
-box('cadeira_encosto',1.44,1.82,.57,.48,.12,.68,'tecido',.05)
-box('cadeira_detalhe',1.49,1.79,.73,.38,.025,.36,'vermelho')
-cylinder('cadeira_base',(1.68,2.04,.24),.04,.42,'escuro',12)
+box('cadeira_assento',1.72,1.83,.45,.48,.48,.12,'tecido',.08)
+box('cadeira_encosto',1.72,1.85,.57,.48,.12,.68,'tecido',.07)
+box('cadeira_detalhe',1.77,1.82,.73,.38,.025,.36,'vermelho',.035)
+cylinder('cadeira_base',(1.96,2.07,.24),.04,.42,'escuro',12)
+for dx,dy in ((-.22,-.16),(.22,-.16),(-.22,.16),(.22,.16)):
+    cylinder('rodinha_cadeira',(1.96+dx,2.07+dy,.05),.045,.07,'escuro',12,(math.pi/2,0,0))
+for x in (1.65,2.18):
+    box('braco_cadeira',x,1.90,.66,.07,.38,.06,'tecido',.025)
+    box('apoio_cadeira',x+.02,2.06,.50,.035,.04,.16,'escuro')
 box('moldura_tv_quarto',1.20,2.86,1.38,.94,.075,.54,'escuro',.008)
 box('obj_tv_quarto',1.23,2.84,1.41,.88,.025,.48,'teladesligada')
 cylinder('vaso_planta',(2.71,2.56,.20),.14,.35,'creme')

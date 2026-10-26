@@ -11,11 +11,15 @@ Este é um projeto inicial para testar a geometria e as interações. As dimens�
 
 ## 2. Copie o modelo
 
-Copie `apartamento.obj` e `apartamento.mtl` juntos para a pasta `www/planta3d` da configuração do Home Assistant, preservando os nomes. O caminho visto de dentro do Home Assistant normalmente é:
+Copie `apartamento.obj`, `apartamento.mtl` e os quatro arquivos `textura_*.png` juntos para a pasta `www/planta3d` da configuração do Home Assistant, preservando os nomes. As texturas são necessárias para os materiais do modelo. O caminho visto de dentro do Home Assistant normalmente é:
 
 ```text
 /config/www/planta3d/apartamento.obj
 /config/www/planta3d/apartamento.mtl
+/config/www/planta3d/textura_coberta.png
+/config/www/planta3d/textura_granito.png
+/config/www/planta3d/textura_madeira.png
+/config/www/planta3d/textura_sofa.png
 ```
 
 Crie a pasta, se necessário. Pode usar o File Editor, Samba ou outro método de acesso aos arquivos que você já utilize. Em Docker, `/config` é o diretório montado para dentro do contêiner; o caminho correspondente no computador ou servidor depende da sua instalação. Confira o volume configurado para o contêiner antes de copiar. Não suponha que ele seja `~/homeassistant`.
@@ -34,6 +38,7 @@ Os arquivos são disponibilizados pelo Home Assistant em `/local/planta3d/`. Par
 - Alterne as cinco luzes existentes e confira se cada luminária representa o cômodo correto. Ligue/desligue uma luz por outro controle do Home Assistant e confira se a planta acompanha.
 - Alterne a luz virtual; abra o painel em outro dispositivo e confira que o estado é compartilhado. Ela não deve alterar nada na casa.
 - Acione cada TV e confira o reflexo azul ou laranja. O card transforma os estados `on`, `playing`, `paused`, `idle` e `buffering` em ligado para a iluminação, e outros estados, inclusive `off`, `standby` e `unavailable`, em apagado. Se a integração da sua TV usar outros estados de funcionamento, a lista em `entity_template` precisará ser adaptada.
+- As TVs usam `light_direction` para orientar o facho para a frente da tela: a TV da sala aponta para X negativo e a do quarto para Z positivo nas coordenadas do modelo OBJ. Se a posição ou a orientação das TVs for modificada no modelo, ajuste também esses vetores no YAML.
 - Faça os testes de navegação e toque no celular. O comportamento de toque pode variar conforme a versão do card e o navegador; a documentação do projeto menciona limitações em dispositivos móveis. Se o toque no objeto não funcionar, use temporariamente os controles nativos do Home Assistant.
 
 O cartão tenta criar luzes 3D; as cores, brilho, sombras e distâncias dependem da versão do componente, da escala do modelo e da potência do dispositivo. O código da versão consultada usa atributos de cor da entidade quando disponíveis, podendo se sobrepor à cor fixa no YAML. Avalie o resultado na sua instalação e ajuste quando necessário. As telas permanecem com o material do modelo; o brilho é uma fonte de luz virtual, não uma imagem de vídeo da TV.
@@ -42,7 +47,7 @@ O cartão tenta criar luzes 3D; as cores, brilho, sombras e distâncias dependem
 
 - **Card reduzido a uma linha:** confira se o YAML contém `style: 'overflow: hidden; width: 100%; height: 500px; position: relative;'` e `grid_options` com `rows: 8` e `columns: full`. Salve e atualize a página.
 - **Card não aparece:** verifique se `floor3d-card` está instalado, carregado como recurso do dashboard e se não há erro no navegador.
-- **Modelo não carrega:** confirme os dois arquivos em `/config/www/planta3d/`, seus nomes e os acessos `/local/` do passo 2. Após substituir um arquivo, atualize a página ignorando cache.
+- **Modelo não carrega ou fica sem textura:** confirme o OBJ, o MTL e as quatro texturas em `/config/www/planta3d/`, seus nomes e os acessos `/local/` do passo 2. Após substituir um arquivo, atualize a página ignorando cache.
 - **Luz não acompanha o dispositivo:** confira o ID, o estado em Ferramentas de desenvolvedor e o nome do objeto; ambos precisam existir. Para TVs, confira também a lista de estados no template.
 - **Lentidão ou tela preta no celular:** no YAML, experimente mudar `shadow: 'yes'` para `shadow: 'no'` no nível principal. Isso desativa sombras em toda a cena e reduz a carga gráfica. Luzes continuarão existindo, mas poderão atravessar divisórias com mais facilidade.
 - **Luz forte ou fraca:** ajuste `lumens`, `distance` e a intensidade ambiente `globalLightPower`. As distâncias deste modelo estão em metros; valores de exemplos que pressupõem centímetros precisam ser ajustados.
