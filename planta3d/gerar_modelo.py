@@ -30,6 +30,13 @@ M={
  'vermelho':mat('vermelho',(.67,.055,.045)), 'planta':mat('folhagem',(.09,.29,.10)),
  'teladesligada':mat('tela_desligada',(.012,.018,.025),.05,.25), 'brilho':mat('luminaria',(.97,.94,.78),0,.3),
  'tecido':mat('tecido_cadeira',(.045,.045,.05)), 'rgb':mat('pc_rgb',(.22,.09,.62),.2,.25),
+ # Acabamentos observados nas fotos atuais do quarto; dimensões continuam aproximadas.
+ 'roupa_cinza':mat('roupa_cama_cinza',(.52,.54,.56),0,.92),
+ 'branco_frio':mat('armario_quarto_branco',(.91,.91,.89),0,.48),
+ 'aluminio':mat('trilho_aluminio',(.52,.54,.55),.6,.30),
+ 'base_cama':mat('cama_marrom_escura',(.10,.075,.065),0,.78),
+ 'pixel_verde':mat('tecla_rgb_verde',(.04,.65,.22),0,.4),
+ 'pixel_azul':mat('tecla_rgb_azul',(.06,.21,.85),0,.4),
 }
 
 # Texturas compactas, geradas localmente e exportadas junto com o modelo OBJ.
@@ -169,6 +176,11 @@ def window_y(name,x,y,w):
 window_x('janela_setup',.25,0,1.15); window_x('janela_quarto',1.0,7.80,1.15)
 window_x('janela_cozinha',4.25,7.80,1.45); window_y('janela_sala',6.50,3.2,1.2)
 window_y('janela_banheiro',0,3.62,.6)
+# Janela de alumínio e persiana horizontal do quarto fotografado.
+box('janela_setup_vidro_escuro',.29,.012,.80,1.07,.02,.46,'teladesligada')
+for z in [.84+i*.045 for i in range(10)]:
+    box('janela_setup_persiana',.82,-.015,z,.56,.025,.018,'aluminio')
+box('janela_setup_trilho_central',.815,-.028,.78,.035,.06,.50,'aluminio')
 # Persiana da janela do outro quarto, com lâminas horizontais visíveis.
 for z in [0.81+i*.055 for i in range(8)]:
     box('persiana_quarto',1.02,7.77,z,1.10,.025,.012,'moldura')
@@ -281,48 +293,69 @@ quilt('coberta_quarto_1',1.78,5.55,.61,.98,1.75,'colcha',.025)
 box('cabeceira_quarto_1',3.07,5.48,.03,.10,1.90,1.05,'madeira')
 for y in (5.73,6.59): box('travesseiro_quarto_1',2.77,y,.63,.25,.56,.10,'vermelho',.04)
 
-# Quarto setup: olhando da porta para dentro (-Y), esquerda corresponde a +X.
-# A posição da cama e da janela foi espelhada; a porta e a TV não mudam.
-box('guarda_roupa_setup',2.65,.16,.03,.53,2.12,2.10,'creme',.01)
-for i in range(5):
-    y=.20+i*.405; box('porta_roupeiro_setup',2.63,y,.10,.018,.39,1.90,'moldura')
-    box('puxador_setup',2.59,y+.31,1.01,.035,.025,.12,'inox',.006)
-box('cama_setup_base',.18,.15,.03,1.40,1.95,.32,'creme',.025)
-box('cama_setup_colchao',.20,.17,.35,1.36,1.91,.22,'colcha',.055)
-quilt('cama_setup_coberta',.22,.48,.63,1.32,1.43,'setupcolcha',.035)
-box('cabeceira_setup',.18,.10,.03,1.40,.08,.80,'madeira2')
+# Quarto: esquerda de quem entra corresponde à parede +X.
+# As posições de paredes, porta e TV permanecem no lugar previamente aprovado.
+# Guarda-roupa claro: duas portas largas de correr e perfis metálicos.
+box('guarda_roupa_setup',2.70,.16,.03,.53,1.82,2.24,'branco_frio',.012)
+for y in (.20,1.10):
+    box('porta_de_correr',2.675,y,.08,.035,.87,2.13,'branco_frio',.008)
+    box('perfil_vertical_porta',2.649,y+.015,.09,.025,.025,2.10,'aluminio')
+for z in (.08,2.21):
+    box('trilho_roupeiro',2.64,.18,z,.065,1.78,.035,'aluminio')
+
+# Cama com base marrom-escura e roupa de cama cinza; objetos transitórios omitidos.
+box('cama_setup_base',.18,.15,.03,1.40,1.95,.32,'base_cama',.035)
+box('cama_setup_colchao',.20,.17,.35,1.36,1.91,.22,'roupa_cinza',.055)
+quilt('cama_setup_coberta',.22,.48,.59,1.32,1.43,'roupa_cinza',.027)
 for x in (.34,.96):
-    box('travesseiro_setup',x,.25,.60,.49,.26,.11,'colcha',.065)
-    box('costura_travesseiro',x+.02,.26,.705,.45,.22,.008,'creme',.015)
-box('mesa_setup',1.06,2.36,.73,1.15,.52,.045,'escuro')
-for x in (1.10,2.12): box('perna_mesa_setup',x,2.40,.03,.05,.44,.70,'escuro')
-for x in (1.10,1.64):
-    box('monitor_setup',x,2.68,.89,.48,.045,.32,'escuro',.01)
-    box('tela_monitor',x+.015,2.665,.91,.45,.008,.28,'teladesligada')
-    box('pe_monitor',x+.19,2.61,.77,.10,.13,.12,'escuro')
-box('teclado',1.34,2.39,.785,.57,.18,.025,'escuro',.01)
+    box('travesseiro_setup',x,.25,.58,.49,.26,.11,'roupa_cinza',.065)
+
+# Mesa e duas telas: a tela maior é central, a outra fica angulada à esquerda.
+box('mesa_setup',1.06,2.31,.73,1.15,.57,.045,'escuro',.008)
+for x in (1.10,2.12): box('perna_mesa_setup',x,2.35,.03,.05,.50,.70,'escuro')
+for x,w,h in ((1.08,.46,.32),(1.58,.57,.38)):
+    box('monitor_setup',x,2.67,.88,w,.045,h,'escuro',.01)
+    box('tela_monitor',x+.012,2.655,.895,w-.024,.008,h-.03,'teladesligada')
+    box('pe_monitor',x+w/2-.05,2.61,.77,.10,.12,.11,'escuro')
+box('teclado',1.31,2.34,.785,.57,.18,.025,'escuro',.01)
 for i in range(12):
-    for j in range(3): box('tecla',1.36+i*.043,2.41+j*.045,.81,.033,.033,.008,'creme',.003)
-sphere('mouse',(1.99,2.43,.80),(.045,.075,.025),'escuro')
-box('tapete_mouse',1.88,2.37,.78,.23,.22,.006,'tecido')
-box('pc_gabinete',2.13,2.48,.78,.24,.37,.48,'escuro',.015)
-for z in (.86,1.00,1.14): cylinder('ventoinha_rgb',(2.14,2.53,z),.047,.02,'rgb',16,(0,math.pi/2,0))
+    for j in range(3): box('tecla_rgb',1.33+i*.043,2.36+j*.045,.81,.033,.033,.008,'pixel_verde' if (i+j)%2 else 'pixel_azul',.003)
+sphere('mouse',(1.98,2.40,.80),(.045,.075,.025),'escuro')
+box('tapete_mouse',1.86,2.33,.78,.24,.22,.006,'tecido')
+box('pc_gabinete',2.13,2.44,.78,.24,.40,.49,'escuro',.015)
+box('lateral_vidro_pc',2.115,2.47,.82,.012,.30,.38,'vidro')
+for z in (.88,1.02,1.16): cylinder('ventoinha_rgb',(2.105,2.53,z),.047,.02,'rgb',16,(0,math.pi/2,0))
+
+# Armário aéreo na parede à direita da TV (perpendicular), com nichos abertos.
+box('armario_aereo_quarto',2.91,1.96,1.84,.33,.90,.45,'branco_frio',.008)
+for i in range(3):
+    box('porta_armario_aereo_quarto',2.887,1.98+i*.29,1.86,.025,.28,.40,'branco_frio',.005)
+box('nicho_quarto_tampo',2.88,2.03,1.40,.33,.82,.035,'branco_frio')
+box('nicho_quarto_base',2.88,2.03,1.08,.33,.82,.035,'branco_frio')
+for y in (2.03,2.44,2.83): box('nicho_quarto_divisoria',2.88,y,1.08,.33,.025,.35,'branco_frio')
+
+# Pequena bancada lateral e impressora 3D com carretel, conforme a foto.
+box('armario_impressora',2.32,2.04,.03,.46,.52,.63,'escuro',.012)
+box('bancada_impressora',2.30,2.02,.66,.50,.55,.04,'branco_frio',.008)
+box('impressora_base',2.34,2.08,.71,.38,.38,.045,'branco_frio')
+for x in (2.36,2.68): box('impressora_coluna',x,2.34,.75,.035,.035,.42,'aluminio')
+box('impressora_travessa',2.36,2.34,1.16,.35,.035,.035,'aluminio')
+box('impressora_cabecote',2.48,2.28,.91,.10,.10,.10,'branco_frio',.005)
+box('impressora_mesa',2.39,2.11,.79,.25,.22,.018,'escuro')
+ring('carretel_impressora',(2.73,2.17,.94),.105,.022,'escuro',rot=(0,math.pi/2,0))
+
+# Cadeira gamer preta; detalhes vermelhos da versão anterior não aparecem nas fotos.
 box('cadeira_assento',1.72,1.83,.45,.48,.48,.12,'tecido',.08)
 box('cadeira_encosto',1.72,1.85,.57,.48,.12,.68,'tecido',.07)
-box('cadeira_detalhe',1.77,1.82,.73,.38,.025,.36,'vermelho',.035)
 cylinder('cadeira_base',(1.96,2.07,.24),.04,.42,'escuro',12)
 for dx,dy in ((-.22,-.16),(.22,-.16),(-.22,.16),(.22,.16)):
     cylinder('rodinha_cadeira',(1.96+dx,2.07+dy,.05),.045,.07,'escuro',12,(math.pi/2,0,0))
 for x in (1.65,2.18):
     box('braco_cadeira',x,1.90,.66,.07,.38,.06,'tecido',.025)
     box('apoio_cadeira',x+.02,2.06,.50,.035,.04,.16,'escuro')
+# A TV mantém posição, eixo e identificador para não quebrar iluminação e interação.
 box('moldura_tv_quarto',1.20,2.86,1.38,.94,.075,.54,'escuro',.008)
 box('obj_tv_quarto',1.23,2.84,1.41,.88,.025,.48,'teladesligada')
-cylinder('vaso_planta',(2.71,2.56,.20),.14,.35,'creme')
-cylinder('tronco_planta',(2.71,2.56,.67),.025,.70,'madeira',10)
-for i in range(15):
-    angle=i*2.4; r=.13+(i%3)*.055
-    sphere('folha_planta',(2.71+math.cos(angle)*r,2.56+math.sin(angle)*r,.90+(i%4)*.105),(.12,.07,.16),'planta')
 
 # Luminárias visíveis e clicáveis; altura aproximada do teto preserva foco de luz.
 for name,x,y in [('obj_luz_sala_1',5.28,1.78),('obj_luz_sala_2',5.42,3.55),('obj_luz_cozinha',4.35,6.30),('obj_luz_corredor',2.55,3.91),('obj_luz_quarto',1.65,1.43),('obj_luz_quarto_1',1.65,6.23)]:
