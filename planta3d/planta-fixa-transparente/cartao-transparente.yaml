@@ -16,13 +16,8 @@ cards:
     card:
       type: picture-elements
       card_mod:
-        style: |
-          ha-card {
-            background: transparent !important;
-            border: none;
-            box-shadow: none;
-            backdrop-filter: none;
-          }
+        style: "ha-card {\n  background: transparent !important;\n  border: none;\n  box-shadow: none;\n\
+          \  backdrop-filter: none;\n}\n"
       image: '${states[''sun.sun''] && states[''sun.sun''].state === ''above_horizon'' ? ''/local/planta3d/planta-fixa-transparente/dia.png''
         : ''/local/planta3d/planta-fixa-transparente/noite.png''}'
       elements:
@@ -244,8 +239,8 @@ cards:
         title: TV do quarto
         icon: mdi:television
         style:
-          top: 50.09%
-          left: 45.43%
+          top: 50.81%
+          left: 62.66%
           transform: translate(-50%, -50%)
           border-radius: 50%
           background: radial-gradient(circle, rgba(20, 24, 31, 0.70) 0 14px, transparent 15px)

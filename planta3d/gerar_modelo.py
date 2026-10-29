@@ -1,5 +1,5 @@
 import bpy, math, os, random
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 # Planta aproximada a partir da documentação e das referências fornecidas.
 # Coordenadas em metros; X é esquerda/direita e Y segue da entrada para a cozinha.
@@ -177,11 +177,11 @@ def wally(x,y1,y2,door=None,window=None):
                 if d>c: box('parede',x-T/2,c,.025,T,d-c,H,'parede',.006)
             box('peitoril_parede',x-T/2,window[0],.025,T,window[1]-window[0],.735,'parede')
         elif b>a: box('parede',x-T/2,a,.025,T,b-a,H,'parede',.006)
-wallx(0,3.30,0,window=(.25,1.40)); wallx(3.30,6.50,0,(5.55,6.35))
+wallx(0,3.30,0); wallx(3.30,6.50,0,(5.55,6.35))
 wallx(0,1.80,3.00); wallx(1.80,3.30,3.00,(2.20,3.00))
 wallx(0,3.30,4.80,(2.20,3.00))
 wallx(0,3.30,7.80,window=(1.0,2.15)); wallx(3.30,6.50,7.80,window=(4.25,5.70))
-wally(0,0,3); wally(0,3,4.8,window=(3.62,4.22)); wally(0,4.8,7.8)
+wally(0,0,3,window=(1.75,2.90)); wally(0,3,4.8,window=(3.62,4.22)); wally(0,4.8,7.8)
 wally(1.80,3,4.8,(3.48,4.28))
 wally(3.30,0,3.00); wally(3.30,4.80,7.80); wally(6.50,0,7.80,window=(3.2,4.4))
 # Divisória baixa entre a cozinha e a área da cristaleira.
@@ -212,6 +212,17 @@ box('janela_setup_vidro_escuro',.29,.012,.80,1.07,.02,.46,'teladesligada')
 for z in [.84+i*.045 for i in range(10)]:
     box('janela_setup_persiana',.82,-.015,z,.56,.025,.018,'aluminio')
 box('janela_setup_trilho_central',.815,-.028,.78,.035,.06,.50,'aluminio')
+# Giro de 90 graus horário visto de cima para mover a janela ao lado oeste.
+# Centro do quarto aproximado (1.65, 1.50); -0.15 m em X corrige o fato de o quarto ser retangular.
+quarto_pivo = Vector((1.65, 1.50, 0))
+rotacao_quarto = Matrix.Translation(quarto_pivo) @ Matrix.Rotation(-math.pi / 2, 4, 'Z') @ Matrix.Translation(-quarto_pivo)
+def girar_quarto(objetos, dx=0, dy=0):
+    trans = Matrix.Translation(Vector((dx, dy, 0))) @ rotacao_quarto
+    for obj in objetos:
+        obj.matrix_world = trans @ obj.matrix_world
+janela_quarto_setup = [obj for obj in bpy.context.scene.objects if obj.name.startswith('janela_setup')]
+girar_quarto(janela_quarto_setup, dx=-.15)
+
 # Persiana da janela do outro quarto, com lâminas horizontais visíveis.
 for z in [0.81+i*.055 for i in range(8)]:
     box('persiana_quarto',1.02,7.77,z,1.10,.025,.012,'moldura')
@@ -444,9 +455,9 @@ quilt('coberta_quarto_1',1.78,5.55,.61,.98,1.75,'colcha',.025)
 box('cabeceira_quarto_1',3.07,5.48,.03,.10,1.90,1.05,'madeira')
 for y in (5.73,6.59): box('travesseiro_quarto_1',2.77,y,.63,.25,.56,.10,'vermelho',.04)
 
-# Quarto: esquerda de quem entra corresponde à parede +X.
-# As posições de paredes, porta e TV permanecem no lugar previamente aprovado.
+# Quarto: os móveis e a janela giram 90 graus no sentido horário, mantendo a porta fixa.
 # Guarda-roupa claro: duas portas largas de correr e perfis metálicos.
+objetos_antes_roupeiro = set(bpy.context.scene.objects)
 box('guarda_roupa_setup',2.70,.16,.03,.53,1.82,2.24,'branco_frio',.012)
 for y in (.20,1.10):
     box('porta_de_correr',2.675,y,.08,.035,.87,2.13,'branco_frio',.008)
@@ -454,14 +465,23 @@ for y in (.20,1.10):
 for z in (.08,2.21):
     box('trilho_roupeiro',2.64,.18,z,.065,1.78,.035,'aluminio')
 
+# Roda apenas o roupeiro para a parede sul; reancora sem alterar as dimensões.
+girar_quarto(set(bpy.context.scene.objects) - objetos_antes_roupeiro, dy=.15)
+
 # Cama com base marrom-escura e roupa de cama cinza; objetos transitórios omitidos.
+objetos_antes_cama = set(bpy.context.scene.objects)
 box('cama_setup_base',.18,.15,.03,1.40,1.95,.32,'base_cama',.035)
 box('cama_setup_colchao',.20,.17,.35,1.36,1.91,.22,'roupa_cinza',.055)
 quilt('cama_setup_coberta',.22,.48,.59,1.32,1.43,'roupa_cinza',.027)
 for x in (.34,.96):
     box('travesseiro_setup',x,.25,.58,.49,.26,.11,'roupa_cinza',.065)
 
+# Roda a cama para a parede oeste, acompanhando a janela. Os 3 cm adicionais
+# mantêm a base afastada da parede da porta no quarto retangular aproximado.
+girar_quarto(set(bpy.context.scene.objects) - objetos_antes_cama, dx=-.15, dy=-.03)
+
 # Mesa e duas telas: a tela maior é central, a outra fica angulada à esquerda.
+objetos_antes_setup = set(bpy.context.scene.objects)
 box('mesa_setup',1.06,2.31,.73,1.15,.57,.045,'escuro',.008)
 for x in (1.10,2.12): box('perna_mesa_setup',x,2.35,.03,.05,.50,.70,'escuro')
 for x,w,h in ((1.08,.46,.32),(1.58,.57,.38)):
@@ -504,9 +524,19 @@ for dx,dy in ((-.22,-.16),(.22,-.16),(-.22,.16),(.22,.16)):
 for x in (1.65,2.18):
     box('braco_cadeira',x,1.90,.66,.07,.38,.06,'tecido',.025)
     box('apoio_cadeira',x+.02,2.06,.50,.035,.04,.16,'escuro')
-# A TV mantém posição, eixo e identificador para não quebrar iluminação e interação.
+# A TV gira com o setup; seu identificador permanece para as interações.
 box('moldura_tv_quarto',1.20,2.86,1.38,.94,.075,.54,'escuro',.008)
 box('obj_tv_quarto',1.23,2.84,1.41,.88,.025,.48,'teladesligada')
+
+# Roda o conjunto da parede da porta para a parede leste. A porta não está neste grupo.
+objetos_setup_girados = set(bpy.context.scene.objects) - objetos_antes_setup
+girar_quarto(objetos_setup_girados, dx=.15)
+# O aéreo e nichos ficavam na parede perpendicular. Como o quarto não é quadrado,
+# reancoramos esses elementos no canto, evitando que atravessem a parede ou o roupeiro.
+for obj in objetos_setup_girados:
+    if obj.name.startswith(('armario_aereo_quarto', 'porta_armario_aereo_quarto', 'nicho_quarto_')):
+        obj.location.x += .08
+        obj.location.y += .15
 
 # Luminárias visíveis e clicáveis; altura aproximada do teto preserva foco de luz.
 for name,x,y in [('obj_luz_sala_1',5.28,1.78),('obj_luz_sala_2',5.42,3.55),('obj_luz_cozinha',4.35,6.30),('obj_luz_corredor',2.55,3.91),('obj_luz_quarto',1.65,1.43),('obj_luz_quarto_1',1.65,6.23)]:

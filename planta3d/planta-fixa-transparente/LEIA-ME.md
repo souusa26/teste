@@ -1,11 +1,11 @@
 # Planta fixa com fundo transparente
 
-As dez imagens RGBA desta pasta têm o mesmo enquadramento de 1000 x 1000 da versão de `planta-fixa`: duas bases e oito camadas. As posições `top` e `left` dos oito botões permanecem as mesmas para esse enquadramento. As imagens foram geradas do modelo mais recente da branch `quarto-fotos`; se a instalação atual usar um modelo anterior, a aparência da casa mudará.
+As dez imagens RGBA desta pasta têm o mesmo enquadramento de 1000 x 1000 da versão de `planta-fixa`: duas bases e oito camadas. Após o giro do quarto, o botão da TV do quarto deve usar `left: 62.66%` e `top: 50.81%`; use o YAML atualizado desta pasta. Os outros sete botões permanecem nas mesmas posições. As imagens foram geradas do modelo mais recente da branch `quarto-fotos`; se a instalação atual usar um modelo anterior, a aparência da casa mudará.
 
 ## Aplicação em uma pasta nova
 
 1. Extraia `imagens-transparentes.zip` para `/config/www/planta3d/planta-fixa-transparente/` no Home Assistant. A pasta deve conter diretamente os dez PNG, sem uma subpasta extra.
-2. Faça uma cópia do YAML atual. No cartão da planta fixa, substitua todas as 10 ocorrências de `/local/planta3d/planta-fixa/` por `/local/planta3d/planta-fixa-transparente/`. Mantenha `top`, `left`, `opacity`, as entidades e `mix-blend-mode: screen` existentes.
+2. Faça uma cópia do YAML atual. No cartão da planta fixa, substitua todas as 10 ocorrências de `/local/planta3d/planta-fixa/` por `/local/planta3d/planta-fixa-transparente/`. Atualize o ponto da TV do quarto conforme indicado acima, e mantenha `opacity`, as entidades e `mix-blend-mode: screen` existentes.
 3. Salve e recarregue sem cache. Se o tema ainda desenhar uma cor ou desfoque por trás da casa, e você já tiver o **card-mod** instalado, adicione o trecho abaixo dentro de `card:`, no mesmo nível de `type: picture-elements` e `image:`. Mantenha o restante do cartão atual.
 
 ```yaml

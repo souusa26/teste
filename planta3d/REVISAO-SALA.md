@@ -1,5 +1,7 @@
 # Revisão da sala e do corredor
 
+> Nota: esta revisão é anterior ao giro do quarto. A TV do quarto mudou de posição e orientação; veja [REVISAO-GIRO-QUARTO.md](REVISAO-GIRO-QUARTO.md).
+
 As fotos serviram de referência para refinar o painel da TV em madeira caramelo, a prateleira com vasos, o rack com laterais ripadas e nicho, o sofá e sua manta quadriculada, o aparador espelhado, o espelho, a mesa de centro com estrutura metálica e o vaso de rosas. Foram acrescentados o relevo geométrico da parede, pingentes de lustre e o móvel lateral do corredor com toalha turquesa.
 
 As medidas e a posição exata do móvel do corredor permanecem aproximadas. A pintura e os materiais espelhados são representações estilizadas; não se trata de renderização fotorrealista. As alterações do quarto foram preservadas.

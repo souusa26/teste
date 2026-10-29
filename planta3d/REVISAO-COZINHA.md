@@ -1,5 +1,7 @@
 # Revisão da cozinha e lavanderia
 
+> Nota: esta revisão é anterior ao giro do quarto. A TV do quarto mudou de posição e orientação; veja [REVISAO-GIRO-QUARTO.md](REVISAO-GIRO-QUARTO.md).
+
 As fotos foram usadas como referência para organizar a geladeira de inox e uma bancada preta contínua com pia e cooktop à esquerda de quem entra. Acrescentamos um frontão de pastilhas pretas, armários aéreos claros com perfis, coifa e gavetas.
 
 Do outro lado, o modelo inclui armário inferior, nichos, micro-ondas e máquina branca de abertura superior próxima à janela. O varal de teto é representado sem roupas; não adicionamos tanque porque ele não foi identificado nas fotos. As posições e dimensões continuam aproximadas, e o modelo é estilizado, não fotorrealista.

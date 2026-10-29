@@ -52,10 +52,18 @@ panel('samsung_fundo',(6.231,1.44,1.16),(.003,1.18,.67),'tv_sala',0)
 for i in range(4):
     panel('samsung_miniatura',(6.227,.96+i*.25,1.21),(.004,.205,.25),'tv_sala',i%4+1)
     panel('samsung_app',(6.226,.97+i*.25,.96),(.004,.15,.07),'tv_sala',5 if i==0 else i%4+1)
-# Roku: face virada para Y negativo, títulos em grade na própria tela.
-panel('roku_fundo',(1.67,2.818,1.65),(.84,.003,.44),'tv_quarto',4)
+# Roku: a interface acompanha a posição e a rotação da tela no modelo.
+# Os deslocamentos e tamanhos abaixo estão nas coordenadas locais da tela.
+tv_quarto = bpy.data.objects['obj_tv_quarto']
+tv_matriz = tv_quarto.matrix_world.copy()
+def painel_roku_local(nome, deslocamento, dimensoes, cor):
+    posicao = tv_matriz @ Vector(deslocamento)
+    objeto = panel(nome, posicao, dimensoes, 'tv_quarto', cor)
+    objeto.rotation_euler = tv_matriz.to_quaternion().to_euler()
+    return objeto
+painel_roku_local('roku_fundo', (0, -.0345, 0), (.84,.003,.44), 4)
 for i in range(4):
-    panel('roku_app',(1.37+i*.19,2.814,1.67),(.15,.004,.15),'tv_quarto',(i%4)+1)
+    painel_roku_local('roku_app', (-.30+i*.19, -.0385, .02), (.15,.004,.15), (i%4)+1)
 
 devices={
  'luz_sala_1':('obj_luz_sala_1',(1,1,1),75),
@@ -71,7 +79,7 @@ lamps={}
 for key,(name,color,energy) in devices.items():
     ob=bpy.data.objects[name]; loc=ob.location.copy()
     if key=='tv_sala': loc.x-=.12
-    if key=='tv_quarto': loc.y-=.12
+    if key=='tv_quarto': loc += ob.matrix_world.to_3x3() @ Vector((0, -.12, 0))
     if not key.startswith('tv_'): loc.z-=.18
     lamp=light('emissao_'+key,loc,energy,.22,color); lamp.hide_render=True; lamps[key]=lamp
 
