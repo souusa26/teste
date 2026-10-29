@@ -43,6 +43,11 @@ M={
  'turquesa':mat('tecido_turquesa',(.04,.57,.48),0,.8),
  'branco_xadrez':mat('linhas_manta',(.60,.70,.65),0,.8),
  'relevo_sombra':mat('relevo_sombra',(.82,.82,.80),0,.8),
+ 'tampo_branco':mat('tampo_branco_jantar',(.91,.93,.92),.05,.20),
+ 'estofado_jantar':mat('estofado_jantar_marrom',(.13,.105,.09),0,.86),
+ 'linha_estofado':mat('costura_estofado',(.22,.18,.15),0,.9),
+ 'toalha_verde':mat('centro_mesa_verde',(.43,.69,.18),0,.85),
+ 'rejunte_banheiro_real':mat('rejunte_banheiro_bege',(.45,.35,.28),0,.85),
 }
 
 # Texturas compactas, geradas localmente e exportadas junto com o modelo OBJ.
@@ -279,22 +284,43 @@ for y in (3.29,3.50,3.70): cylinder('vaso_corredor',(3.49,y,.79),.045,.15,'doura
 box('porta_retrato_moldura',3.32,3.24,.725,.025,.43,.30,'moldura')
 for i in range(3): box('foto_retrato',3.305,3.28+i*.12,.775,.012,.09,.10,'espelhado')
 
-# Sala de jantar e cristaleira.
-box('mesa_jantar',5.08,3.40,.76,1.18,.88,.08,'madeira2',.02)
-box('toalha_jantar',5.14,3.44,.84,1.06,.80,.012,'vermelho')
-for x in (5.18,6.10):
-    for y in (3.49,4.11): box('perna_mesa',x,y,.03,.07,.07,.73,'madeira')
+# Sala de jantar: tampo branco, pequenos jogos verdes e arranjo de rosas.
+box('mesa_jantar',5.08,3.40,.76,1.18,.88,.08,'tampo_branco',.02)
+box('base_mesa_jantar',5.40,3.69,.03,.50,.30,.72,'creme',.015)
+for i in range(3):
+    # Eleva discretamente as peças sobrepostas para evitar superfícies coplanares.
+    tapete=cube('centro_mesa_verde',(5.32+i*.30,3.84,.846+i*.010),(.30,.30,.008),'toalha_verde')
+    tapete.rotation_euler.z=math.pi/4
+cylinder('vaso_jantar',(5.66,3.84,.91),.075,.13,'escuro',20)
+for i in range(7):
+    a=i*2.4; xx=5.66+math.cos(a)*.045; yy=3.84+math.sin(a)*.045
+    cylinder('caule_jantar',(xx,yy,1.03),.006,.22,'planta',8)
+    sphere('rosa_jantar',(xx,yy,1.14),(.032,.032,.035),'vermelho')
+# As duas cadeiras próximas ao painel conservam o assento na mesma posição;
+# o encosto passa para a borda externa, em vez de ficar junto ao tampo.
 for x,y in ((5.18,3.14),(5.76,3.14),(5.18,4.32),(5.76,4.32)):
-    box('assento_cadeira',x,y,.43,.40,.37,.07,'madeira2',.015)
+    box('assento_cadeira',x,y,.43,.40,.37,.08,'estofado_jantar',.025)
     for xx in (x+.03,x+.31):
         for yy in (y+.03,y+.28): box('perna_cadeira',xx,yy,.03,.05,.05,.40,'madeira')
-    box('encosto_cadeira',x,y+.31,.50,.40,.06,.45,'madeira')
+    encosto_y=y if y<3.5 else y+.31
+    box('encosto_cadeira',x,encosto_y,.50,.40,.06,.46,'estofado_jantar',.025)
+    box('moldura_encosto_cadeira',x,encosto_y,.96,.40,.065,.035,'madeira2',.007)
+    for k in range(1,4):
+        xx=x+.08*k
+        beam('costura_encosto',(xx,encosto_y-.004,.55),(min(x+.39,xx+.15),encosto_y-.004,.89),.005,'linha_estofado')
 box('cristaleira',5.22,5.05,.04,.72,.40,1.75,'madeira2',.015)
 box('cristaleira_frente',5.25,5.02,.35,.66,.025,1.35,'vidro')
 for z in (.47,.80,1.13,1.46): box('cristaleira_prateleira',5.25,5.04,z,.66,.36,.025,'madeira')
 for z in (.50,.83,1.16,1.49):
     for x in (5.35,5.52,5.69):
         cylinder('louca_cristaleira',(x,5.20,z+.045),.045,.09,'loucabranca',16)
+# Prateleiras vazadas e haste metálica junto à divisão com a cozinha.
+for z in (1.07,1.45,1.83,2.21):
+    box('prateleira_divisoria',4.84,4.86,z,.36,.66,.045,'creme',.008)
+cylinder('haste_divisoria',(5.16,4.92,1.64),.018,1.18,'inox',12)
+for z in (1.10,1.48,1.86):
+    cylinder('vaso_prateleira',(5.02,5.22,z+.05),.045,.10,'dourado',12)
+    sphere('planta_prateleira',(5.02,5.22,z+.13),(.07,.07,.08),'planta')
 
 # Cozinha e lavanderia: armários, bancada, eletrodomésticos.
 box('geladeira',3.43,4.97,.03,.63,.64,1.72,'inox',.02)
@@ -325,24 +351,30 @@ for x in (4.30,4.40,4.51): cylinder('botao_maquina',(x,7.035,.82),.018,.015,'esc
 box('tanque',4.93,7.13,.03,.60,.55,.83,'loucabranca')
 box('cuba_tanque',4.99,7.18,.86,.47,.42,.025,'inox')
 
-# Banheiro: vaso, nichos, bancada e box.
-sphere('vaso_base',(.35,4.05,.21),(.19,.23,.19),'loucabranca')
-sphere('vaso_taça',(.35,3.99,.35),(.24,.30,.16),'loucabranca')
-ring('vaso_assento',(.35,3.98,.47),.16,.025,'loucabranca',scale=(1.08,1.38,1))
-sphere('agua_vaso',(.35,3.98,.465),(.12,.16,.008),'vidro')
-box('vaso_caixa',.10,4.21,.35,.32,.18,.39,'loucabranca',.02)
-for z in (.95,1.17,1.39): box('nicho_banheiro',.06,3.80,z,.20,.50,.08,'creme')
-box('bancada_banheiro',.12,3.12,.76,.52,.48,.08,'granito')
-box('cuba_banheiro',.16,3.16,.84,.40,.38,.12,'loucabranca',.04)
-box('espelho_banheiro',.08,3.15,.97,.025,.40,.50,'inox')
+# Banheiro: olhando da porta para a janela, vaso à esquerda e pia à direita.
+# As paredes permanecem as mesmas; detalhes e distâncias são aproximados.
+sphere('vaso_base',(.39,3.38,.21),(.23,.19,.19),'loucabranca')
+sphere('vaso_taca',(.43,3.38,.35),(.30,.24,.16),'loucabranca')
+ring('vaso_assento',(.43,3.38,.47),.16,.025,'loucabranca',scale=(1.38,1.08,1))
+sphere('agua_vaso',(.43,3.38,.465),(.16,.12,.008),'vidro')
+box('vaso_caixa',.10,3.18,.35,.19,.40,.39,'loucabranca',.02)
+for z in (1.01,1.32,1.63):
+    box('nicho_banheiro_fundo',.07,3.10,z,.035,.42,.24,'escuro')
+    for zz in (z,z+.22): box('nicho_banheiro_moldura',.085,3.10,zz,.11,.42,.025,'branco_frio')
+    for yy in (3.10,3.495): box('nicho_banheiro_lateral',.085,yy,z,.11,.025,.24,'branco_frio')
+box('bancada_banheiro',.12,4.24,.76,.52,.47,.08,'granito')
+box('cuba_banheiro',.16,4.28,.84,.40,.37,.12,'loucabranca',.04)
+box('espelho_banheiro',.08,4.28,.97,.025,.38,.50,'espelhado')
+cylinder('torneira_banheiro',(.20,4.58,1.02),.018,.20,'inox',12)
 box('piso_box',1.05,3.86,.035,.69,.80,.025,'creme')
 box('vidro_box',1.04,3.86,.06,.025,.80,1.45,'vidro')
 for y in (3.86,4.64): box('perfil_box',1.02,y,.06,.045,.035,1.45,'escuro')
-# Faixas de rejunte sugerem os azulejos do banheiro, conforme o vídeo.
-for z in (.30,.60,.90,1.20): box('rejunte_banheiro',.055,3.05,z,.008,1.68,.005,'rejunte')
-for y in [3.15+i*.30 for i in range(6)]: box('rejunte_banheiro',.055,y,.06,.008,.005,1.22,'rejunte')
-cylinder('chuveiro_haste',(.24,4.57,1.57),.018,.25,'inox',12)
-sphere('chuveiro',(.24,4.57,1.46),(.10,.10,.04),'inox')
+# Azulejo branco e rejunte acastanhado conforme as fotografias.
+for z in (.30,.60,.90,1.20): box('rejunte_banheiro',.055,3.05,z,.008,1.68,.005,'rejunte_banheiro_real')
+for y in [3.15+i*.30 for i in range(6)]: box('rejunte_banheiro',.055,y,.06,.008,.005,1.22,'rejunte_banheiro_real')
+# Chuveiro branco próximo ao box. A posição é aproximada pela foto.
+cylinder('chuveiro_haste',(1.42,4.60,1.58),.018,.26,'loucabranca',12,(0,math.pi/2,0))
+sphere('chuveiro',(1.30,4.60,1.55),(.13,.13,.035),'loucabranca')
 
 # Quarto do vídeo: cama, cabeceira, roupa de cama e guarda-roupa.
 box('guarda_roupa_quarto_1',.12,5.11,.03,.53,2.35,2.08,'creme',.01)
