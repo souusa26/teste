@@ -20,6 +20,7 @@ Copie `apartamento.obj`, `apartamento.mtl` e todos os arquivos `textura_*.png` j
 /config/www/planta3d/textura_granito.png
 /config/www/planta3d/textura_madeira.png
 /config/www/planta3d/textura_painel_tv.png
+/config/www/planta3d/textura_pastilhas_cozinha.png
 /config/www/planta3d/textura_sofa.png
 ```
 

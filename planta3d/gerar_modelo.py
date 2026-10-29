@@ -48,6 +48,7 @@ M={
  'linha_estofado':mat('costura_estofado',(.22,.18,.15),0,.9),
  'toalha_verde':mat('centro_mesa_verde',(.43,.69,.18),0,.85),
  'rejunte_banheiro_real':mat('rejunte_banheiro_bege',(.45,.35,.28),0,.85),
+ 'pastilhas_cozinha':mat('pastilhas_cozinha_pretas',(.07,.07,.075),.10,.30),
 }
 
 # Texturas compactas, geradas localmente e exportadas junto com o modelo OBJ.
@@ -88,9 +89,17 @@ def blanket(u,v,r):
 def woven(u,v,r):
     detail=.025*(math.sin(u*500)+math.sin(v*500))+(r.random()-.5)*.02
     return (.58+detail,.56+detail,.51+detail)
+def mosaic(u,v,r):
+    # Pastilhas pequenas escuras com linhas claras de rejunte.
+    edge=(int(u*192)%12<2 or int(v*192)%32<2)
+    if edge: return (.56,.56,.54)
+    tile=((int(u*192)//12)*37+(int(v*192)//32)*17)%7
+    value=.025+tile*.012+(r.random()-.5)*.008
+    return (value,value,value+.005)
 for args in [('madeira','textura_madeira.png',wood),('granito','textura_granito.png',granite),
              ('setupcolcha','textura_coberta.png',blanket),('sofa','textura_sofa.png',woven),
-             ('painel_caramelo','textura_painel_tv.png',wood_caramel)]:
+             ('painel_caramelo','textura_painel_tv.png',wood_caramel),
+             ('pastilhas_cozinha','textura_pastilhas_cozinha.png',mosaic)]:
     texture(*args)
 
 def cube(name, xyz, dims, material, bevel=0):
@@ -322,34 +331,82 @@ for z in (1.10,1.48,1.86):
     cylinder('vaso_prateleira',(5.02,5.22,z+.05),.045,.10,'dourado',12)
     sphere('planta_prateleira',(5.02,5.22,z+.13),(.07,.07,.08),'planta')
 
-# Cozinha e lavanderia: armários, bancada, eletrodomésticos.
+# Cozinha e lavanderia: dois lados de armários com circulação central.
+# Posições e medidas estimadas das fotografias, sem objetos temporários.
 box('geladeira',3.43,4.97,.03,.63,.64,1.72,'inox',.02)
-box('porta_geladeira',3.41,4.99,.09,.025,.60,1.05,'inox')
-box('geladeira_puxador',3.37,5.08,.75,.04,.05,.49,'escuro',.006)
-box('armario_pia',3.43,5.72,.03,.60,1.05,.82,'taupe')
-for y in (5.75,6.26):
-    box('frente_armario_cozinha',4.032,y,.10,.018,.47,.68,'taupe',.006)
-    box('puxador_armario_cozinha',4.055,y+.10,.69,.035,.25,.025,'inox',.007)
-box('bancada_cozinha',3.39,5.69,.85,.67,1.11,.05,'granito')
-box('cuba_cozinha',3.48,5.90,.901,.45,.55,.016,'inox',.035)
-box('interior_cuba',3.52,5.94,.919,.37,.47,.006,'escuro',.045)
-box('fundo_cuba',3.55,5.97,.922,.31,.41,.005,'inox',.04)
+box('frente_geladeira',4.061,4.99,.07,.015,.60,1.61,'inox',.006)
+box('divisao_geladeira',4.08,4.99,.93,.012,.60,.025,'escuro')
+box('puxador_geladeira_superior',4.086,5.04,1.01,.025,.49,.023,'escuro',.006)
+box('puxador_geladeira_inferior',4.086,5.04,.86,.025,.49,.023,'escuro',.006)
+box('aereo_sobre_geladeira',3.39,4.96,1.78,.53,.65,.44,'branco_frio',.008)
+box('porta_aereo_geladeira',3.92,4.99,1.81,.018,.59,.38,'branco_frio')
+box('perfil_aereo_geladeira',3.94,4.99,1.84,.02,.59,.023,'aluminio')
+
+# Bancada contínua de granito com pia e cooktop; o frontão é de pastilhas.
+box('armario_pia',3.43,5.65,.03,.60,1.82,.82,'taupe')
+for y in (5.68,6.13,6.58,7.03):
+    box('frente_armario_cozinha',4.035,y,.09,.018,.42,.70,'taupe',.006)
+    box('puxador_armario_cozinha',4.055,y+.04,.70,.025,.34,.022,'aluminio',.004)
+for z in (.24,.39,.54):
+    box('linha_gaveta_cozinha',4.057,6.59,z,.008,.40,.010,'aluminio')
+box('bancada_cozinha',3.39,5.62,.85,.67,1.88,.05,'granito')
+box('pastilhas_cozinha',3.342,5.64,.90,.018,1.85,.64,'pastilhas_cozinha')
+box('cuba_cozinha',3.48,5.86,.901,.45,.55,.016,'inox',.035)
+box('interior_cuba',3.52,5.90,.919,.37,.47,.006,'escuro',.045)
+box('fundo_cuba',3.55,5.93,.922,.31,.41,.005,'inox',.04)
 cylinder('torneira_cozinha',(3.47,6.10,1.03),.025,.25,'inox',12)
 cylinder('bica_torneira',(3.57,6.10,1.14),.018,.21,'inox',12,(0,math.pi/2,0))
-box('armario_aereo',3.42,5.75,1.45,.38,.98,.62,'taupe')
-for yy in (5.78,6.25): box('porta_armario',3.40,yy,1.48,.03,.42,.56,'creme')
-box('fogao_corpo',3.44,6.90,.03,.60,.55,.82,'loucabranca',.015)
-box('fogao_tampo',3.43,6.89,.85,.62,.57,.04,'granito')
-box('porta_forno',4.045,6.93,.18,.02,.45,.48,'escuro',.01)
-box('puxador_forno',4.075,6.98,.69,.025,.36,.025,'inox',.006)
-for xx in (3.58,3.89):
-    for yy in (7.04,7.30): cylinder('boca_fogao',(xx,yy,.90),.075,.015,'escuro',16)
-box('maquina_lavar',4.22,7.06,.03,.62,.61,.89,'loucabranca',.02)
-cylinder('porta_maquina',(4.54,7.045,.53),.20,.025,'escuro',24,(math.pi/2,0,0))
-cylinder('vidro_maquina',(4.54,7.025,.53),.145,.018,'vidro',24,(math.pi/2,0,0))
-for x in (4.30,4.40,4.51): cylinder('botao_maquina',(x,7.035,.82),.018,.015,'escuro',12,(math.pi/2,0,0))
-box('tanque',4.93,7.13,.03,.60,.55,.83,'loucabranca')
-box('cuba_tanque',4.99,7.18,.86,.47,.42,.025,'inox')
+box('escorredor_base',3.48,5.68,.915,.45,.15,.015,'inox')
+for yy in [5.69+i*.025 for i in range(6)]: box('escorredor_grade',3.50,yy,.93,.40,.006,.008,'aluminio')
+box('cooktop_preto',3.45,6.75,.904,.55,.56,.025,'escuro',.01)
+for xx in (3.58,3.87):
+    for yy in (6.89,7.15):
+        ring('boca_cooktop',(xx,yy,.936),.065,.010,'inox')
+        cylinder('centro_cooktop',(xx,yy,.937),.045,.008,'escuro',16)
+box('armario_aereo_esquerda',3.40,5.63,1.58,.42,1.88,.78,'branco_frio',.008)
+for yy in (5.66,6.11,6.56,7.01):
+    box('porta_aereo_esquerda',3.821,yy,1.61,.018,.42,.72,'branco_frio')
+    for zz in (1.94,2.26): box('perfil_aereo_esquerda',3.843,yy,zz,.018,.42,.018,'aluminio')
+box('coifa_inox',3.44,6.81,1.49,.48,.54,.08,'inox',.01)
+box('coifa_escura',3.52,6.86,1.48,.33,.42,.015,'escuro')
+box('torradeira',3.49,7.37,.91,.28,.26,.27,'inox',.025)
+
+# Lado direito com armário baixo, aéreo, nichos e micro-ondas.
+box('armario_oposto_inferior',6.02,5.35,.03,.44,1.30,.83,'taupe',.008)
+box('tampo_oposto',6.00,5.32,.86,.47,1.36,.035,'creme')
+for yy in (5.38,6.01):
+    box('porta_armario_oposto',6.001,yy,.10,.018,.59,.69,'taupe')
+    box('perfil_armario_oposto',5.978,yy+.04,.70,.022,.51,.023,'aluminio')
+box('aereo_oposto',6.06,5.32,1.49,.40,1.42,.83,'branco_frio',.008)
+for yy in (5.36,5.81,6.26):
+    box('porta_aereo_oposto',6.039,yy,1.53,.018,.42,.75,'branco_frio')
+    box('perfil_aereo_oposto',6.016,yy,1.57,.020,.42,.022,'aluminio')
+for zz in (1.30,1.62,1.94,2.26):
+    box('nicho_lateral_oposto',5.86,5.00,zz,.60,.28,.045,'creme',.01)
+for zz in (1.35,1.67,1.99):
+    cylinder('vaso_nicho_cozinha',(6.12,5.13,zz+.045),.045,.09,'loucabranca',12)
+    sphere('planta_nicho_cozinha',(6.12,5.13,zz+.12),(.06,.06,.07),'planta')
+box('nicho_microondas',6.04,6.83,1.39,.41,.70,.48,'branco_frio')
+box('microondas_inox',6.045,6.88,1.43,.38,.60,.39,'inox',.012)
+box('frente_microondas',6.026,6.90,1.47,.012,.45,.30,'escuro',.005)
+box('painel_microondas',6.025,7.36,1.47,.012,.10,.30,'aluminio')
+box('display_microondas',6.010,7.37,1.68,.006,.075,.04,'pixel_azul')
+box('puxador_microondas',6.005,6.94,1.50,.025,.025,.23,'aluminio',.008)
+
+# Lavadora de abertura superior na parede direita, sem inventar tanque.
+box('maquina_lavar_superior',5.81,6.88,.03,.63,.66,.88,'loucabranca',.025)
+box('tampa_maquina_superior',5.85,6.92,.912,.55,.57,.035,'branco_frio',.018)
+box('painel_maquina_superior',5.85,7.36,.95,.55,.13,.045,'creme',.01)
+for yy in (7.38,7.42,7.46): cylinder('botao_maquina_superior',(5.97,yy,.999),.016,.012,'escuro',12)
+box('abertura_tampa_maquina',5.91,6.94,.949,.43,.40,.009,'vidro',.02)
+
+# Varal branco suspenso diante da janela da lavanderia, sem roupas.
+for xx in (4.38,5.65):
+    box('suporte_varal',(xx),7.16,2.36,.035,.54,.035,'branco_frio')
+for yy in (7.18,7.28,7.38,7.48,7.58,7.68):
+    beam('barra_varal',(4.38,yy,2.36),(5.68,yy,2.36),.009,'branco_frio')
+for xx in (4.38,5.65):
+    for yy in (7.16,7.68): beam('tirante_varal',(xx,yy,2.36),(xx,yy,2.55),.006,'branco_frio')
 
 # Banheiro: olhando da porta para a janela, vaso à esquerda e pia à direita.
 # As paredes permanecem as mesmas; detalhes e distâncias são aproximados.
