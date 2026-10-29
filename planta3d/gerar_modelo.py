@@ -37,6 +37,12 @@ M={
  'base_cama':mat('cama_marrom_escura',(.10,.075,.065),0,.78),
  'pixel_verde':mat('tecla_rgb_verde',(.04,.65,.22),0,.4),
  'pixel_azul':mat('tecla_rgb_azul',(.06,.21,.85),0,.4),
+ 'painel_caramelo':mat('painel_tv_caramelo',(.48,.28,.14),0,.48),
+ 'espelhado':mat('vidro_espelhado',(.53,.57,.58),.85,.12),
+ 'dourado':mat('metal_dourado',(.59,.41,.16),.7,.25),
+ 'turquesa':mat('tecido_turquesa',(.04,.57,.48),0,.8),
+ 'branco_xadrez':mat('linhas_manta',(.60,.70,.65),0,.8),
+ 'relevo_sombra':mat('relevo_sombra',(.82,.82,.80),0,.8),
 }
 
 # Texturas compactas, geradas localmente e exportadas junto com o modelo OBJ.
@@ -63,6 +69,10 @@ def wood(u,v,r):
     vein=0.5+0.5*math.sin(110*u+3*math.sin(v*12)+1.3*math.sin(v*36))
     noise=(r.random()-.5)*.03
     return (.21+.18*vein+noise,.085+.095*vein+noise,.038+.05*vein+noise)
+def wood_caramel(u,v,r):
+    vein=.5+.5*math.sin(95*u+2*math.sin(v*10)+math.sin(v*28))
+    noise=(r.random()-.5)*.022
+    return (.37+.16*vein+noise,.20+.12*vein+noise,.10+.07*vein+noise)
 def granite(u,v,r):
     n=r.random(); grain=.12 if n>.95 else (.04 if n>.78 else 0)
     return (.06+grain,.06+grain,.065+grain)
@@ -74,7 +84,8 @@ def woven(u,v,r):
     detail=.025*(math.sin(u*500)+math.sin(v*500))+(r.random()-.5)*.02
     return (.58+detail,.56+detail,.51+detail)
 for args in [('madeira','textura_madeira.png',wood),('granito','textura_granito.png',granite),
-             ('setupcolcha','textura_coberta.png',blanket),('sofa','textura_sofa.png',woven)]:
+             ('setupcolcha','textura_coberta.png',blanket),('sofa','textura_sofa.png',woven),
+             ('painel_caramelo','textura_painel_tv.png',wood_caramel)]:
     texture(*args)
 
 def cube(name, xyz, dims, material, bevel=0):
@@ -97,6 +108,12 @@ def ring(name,xyz,major,minor,material,scale=(1,1,1),rot=(0,0,0)):
     o=bpy.context.object; o.name=name; o.scale=scale
     bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
     o.data.materials.append(M[material]); return o
+
+def beam(name,a,b,width,material):
+    a,b=Vector(a),Vector(b)
+    o=cube(name,(a+b)/2,((b-a).length,width,width),material)
+    o.rotation_euler=(b-a).to_track_quat('X','Z').to_euler()
+    return o
 
 def quilt(name,x,y,z,w,d,material,wrinkle=.018):
     # Superfície com pequenas dobras e UV próprio, para evitar uma colcha em bloco.
@@ -185,14 +202,17 @@ box('janela_setup_trilho_central',.815,-.028,.78,.035,.06,.50,'aluminio')
 for z in [0.81+i*.055 for i in range(8)]:
     box('persiana_quarto',1.02,7.77,z,1.10,.025,.012,'moldura')
 
-# Sala: aparador, vaso e sofá com almofadas.
-box('aparador_corpo',3.62,.12,.04,.85,.37,.72,'creme',.01)
-box('aparador_tampo',3.60,.10,.76,.89,.41,.045,'vidro',.01)
-box('espelho_sala',3.64,.075,.83,.78,.025,.42,'inox')
-cylinder('vaso_rosas',(4.17,.28,.84),.07,.17,'loucabranca')
-for i in range(6):
-    xx=4.17+random.uniform(-.06,.06); yy=.28+random.uniform(-.05,.05)
-    cylinder('caule',(xx,yy,1.02),.008,.25,'planta',8); sphere('rosa',(xx,yy,1.16),(.045,.045,.045),'vermelho')
+# Sala: aparador espelhado junto à entrada, com estrutura preta e tampo espelhado.
+box('aparador_estrutura',3.62,.12,.04,.85,.37,.72,'escuro',.01)
+for i in range(3):
+    box('aparador_painel_espelho',3.64+i*.275,.491,.10,.255,.012,.61,'espelhado')
+    box('aparador_montante',3.63+i*.275,.502,.08,.018,.015,.65,'dourado')
+box('aparador_tampo',3.60,.10,.76,.89,.41,.035,'espelhado',.008)
+box('aparador_passadeira',3.66,.13,.797,.75,.31,.008,'verdeagua')
+for i,(x,h) in enumerate(((3.78,.20),(4.03,.27),(4.29,.32))):
+    cylinder('vaso_dourado_aparador',(x,.28,.80+h/2),.045,h,'dourado',20)
+box('espelho_sala_moldura',3.55,.07,.84,1.04,.035,.44,'escuro')
+box('espelho_sala',3.58,.11,.86,.98,.015,.40,'espelhado')
 box('sofa_base',3.72,.63,.06,.76,1.84,.29,'sofa',.06)
 box('sofa_assento',3.78,.69,.35,.67,1.70,.19,'sofa',.06)
 box('sofa_encosto',3.71,.63,.36,.20,1.84,.65,'sofa',.05)
@@ -201,21 +221,63 @@ for i,y in enumerate((.86,1.34,1.82)):
     o=box('almofada',3.94,y,.56,.18,.30,.28,'mostarda' if i==1 else 'verdeagua',.075)
     o.rotation_euler.y=.14 if i==0 else -.10
 for y in (1.03,1.61): box('costura_sofa',3.78,y,.536,.66,.009,.008,'creme')
-quilt('manta_sofa',4.13,1.32,.56,.30,.72,'verde',.025)
-for y in (1.42,1.55,1.68,1.81,1.94): box('xadrez_manta',4.14,y,.576,.28,.008,.006,'verdeagua')
+quilt('manta_sofa',3.84,.71,.56,.56,1.65,'verde',.012)
+for y in [.80+i*.17 for i in range(9)]: box('xadrez_manta',3.85,y,.575,.54,.007,.006,'branco_xadrez')
+for x in (3.93,4.10,4.27): box('xadrez_manta',x,.72,.575,.007,1.62,.006,'branco_xadrez')
+# Relevo triangular branco na parede atrás do sofá.
+verts=[]; faces=[]
+for y_i in range(15):
+    for z_i in range(7):
+        y=.63+y_i*.12; z=.19+z_i*.14; k=len(verts)
+        verts.extend([(3.357,y,z),(3.357,y+.12,z),(3.357,y+.12,z+.14),(3.357,y,z+.14),(3.378,y+.06,z+.07)])
+        faces.extend([(k,k+1,k+4),(k+1,k+2,k+4),(k+2,k+3,k+4),(k+3,k,k+4)])
+mesh=bpy.data.meshes.new('relevo_geometrico_sala'); mesh.from_pydata(verts,[],faces); mesh.update()
+ob=bpy.data.objects.new('relevo_geometrico_sala',mesh); bpy.context.collection.objects.link(ob); ob.data.materials.append(M['parede'])
+box('quadro_verde_moldura',3.383,1.48,.83,.025,.40,.35,'madeira2')
+box('quadro_verde',3.409,1.50,.85,.01,.36,.31,'verdeagua')
 # Mesa centro e estante da TV.
-box('mesa_centro_base',4.63,1.00,.05,.48,.86,.38,'escuro')
-box('mesa_centro_vidro',4.58,.95,.43,.58,.96,.035,'vidro',.01)
-for x in (4.60,5.08):
-    for y in (.97,1.85): box('perna_mesa_centro',x,y,.045,.035,.035,.37,'inox',.008)
-box('painel_tv',6.35,.56,.03,.10,1.90,1.85,'madeira')
-box('rack_tv',6.10,.58,.04,.26,1.86,.46,'creme',.015)
-for y in [0.62+i*.045 for i in range(40)]: box('detalhe_canelado_rack',6.075,y,.08,.018,.016,.35,'moldura',.004)
+box('mesa_centro_vidro',4.58,.95,.43,.58,.96,.035,'espelhado',.008)
+for x in (4.60,5.12):
+    for y in (.97,1.87): box('perna_mesa_centro',x,y,.045,.025,.025,.39,'escuro')
+for x in (4.61,5.12):
+    beam('diagonal_mesa',(x,.98,.08),(x,1.87,.40),.018,'escuro')
+    beam('diagonal_mesa',(x,1.87,.08),(x,.98,.40),.018,'escuro')
+for y in (.97,1.87):
+    beam('travessa_mesa',(4.61,y,.07),(5.12,y,.07),.018,'escuro')
+cylinder('vaso_rosas_mesa',(4.88,1.43,.53),.09,.14,'dourado',20)
+for i in range(7):
+    xx=4.88+random.uniform(-.075,.075); yy=1.43+random.uniform(-.075,.075)
+    cylinder('caule_rosa',(xx,yy,.67),.006,.20,'planta',8)
+    sphere('rosa_mesa',(xx,yy,.78),(.035,.035,.04),'vermelho')
+box('painel_tv',6.35,.56,.03,.10,1.90,1.85,'painel_caramelo')
+for z in (.53,1.59): box('friso_painel_tv',6.345,.58,z,.012,1.86,.012,'dourado')
+box('prateleira_superior_tv',6.17,.60,1.64,.20,1.80,.035,'painel_caramelo')
+for y in (.75,1.02):
+    cylinder('vaso_branco_tv',(6.24,y,1.74),.035,.16,'loucabranca',20)
+box('rack_tv_base',6.10,.58,.20,.26,1.86,.31,'painel_caramelo',.015)
+box('nicho_tv_centro',6.07,1.14,.25,.03,.73,.21,'escuro')
+for yy in (.60,1.93):
+    box('rack_porta_clara',6.065,yy,.22,.035,.48,.27,'moldura')
+    for i in range(11): box('detalhe_canelado_rack',6.055,yy+i*.043,.23,.012,.012,.25,'creme')
 box('moldura_tv_sala',6.27,.80,.78,.075,1.28,.77,'escuro',.01)
 box('obj_tv_sala',6.25,.83,.81,.025,1.22,.71,'teladesligada')
 box('ps5_centro',6.12,.70,.53,.12,.26,.08,'escuro')
 box('ps5_superior',6.11,.68,.62,.14,.30,.025,'moldura')
 box('ps5_inferior',6.11,.68,.50,.14,.30,.025,'moldura')
+# Pingentes de cristal abaixo da luminária central da sala.
+for i in range(11):
+    angle=i*2.4; r=.018+.012*(i%3); z=2.34-i*.043
+    sphere('gota_lustre',(5.28+math.cos(angle)*r,1.78+math.sin(angle)*r,z),(.018,.018,.025),'espelhado')
+
+# Corredor: móvel lateral baixo com toalha turquesa e quadro, posição aproximada.
+box('movel_corredor',3.34,3.17,.03,.34,.72,.67,'madeira2',.008)
+box('porta_movel_corredor',3.315,3.22,.10,.025,.42,.53,'creme')
+for z in (.17,.34,.51): box('nicho_movel_corredor',3.31,3.66,z,.03,.18,.11,'escuro')
+box('toalha_movel_corredor',3.34,3.17,.71,.34,.72,.012,'turquesa')
+for y in (3.29,3.50,3.70): cylinder('vaso_corredor',(3.49,y,.79),.045,.15,'dourado',18)
+# Moldura apoiada junto ao móvel: sem inventar uma parede que feche a passagem.
+box('porta_retrato_moldura',3.32,3.24,.725,.025,.43,.30,'moldura')
+for i in range(3): box('foto_retrato',3.305,3.28+i*.12,.775,.012,.09,.10,'espelhado')
 
 # Sala de jantar e cristaleira.
 box('mesa_jantar',5.08,3.40,.76,1.18,.88,.08,'madeira2',.02)
