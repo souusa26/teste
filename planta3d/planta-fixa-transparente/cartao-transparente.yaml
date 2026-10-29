@@ -1,0 +1,265 @@
+type: vertical-stack
+cards:
+- type: vertical-stack
+  cards:
+  - type: custom:config-template-card
+    entities:
+    - sun.sun
+    - switch.luzes_da_sala_switch_1
+    - switch.luzes_da_sala_switch_2
+    - light.luz_da_cozinha
+    - switch.luz_do_corredor_switch_1
+    - light.luz_do_quarto
+    - input_boolean.luz_virtual_quarto_1
+    - media_player.tv_samsung
+    - media_player.aoc_h302x_44b3
+    card:
+      type: picture-elements
+      card_mod:
+        style: |
+          ha-card {
+            background: transparent !important;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+          }
+      image: '${states[''sun.sun''] && states[''sun.sun''].state === ''above_horizon'' ? ''/local/planta3d/planta-fixa-transparente/dia.png''
+        : ''/local/planta3d/planta-fixa-transparente/noite.png''}'
+      elements:
+      - type: image
+        image: /local/planta3d/planta-fixa-transparente/luz_sala_1.png
+        style:
+          left: 50%
+          top: 50%
+          width: 100%
+          pointer-events: none
+          mix-blend-mode: screen
+          opacity: '${states[''switch.luzes_da_sala_switch_1''] && states[''switch.luzes_da_sala_switch_1''].state
+            === ''on'' ? 1 : 0}'
+      - type: image
+        image: /local/planta3d/planta-fixa-transparente/luz_sala_2.png
+        style:
+          left: 50%
+          top: 50%
+          width: 100%
+          pointer-events: none
+          mix-blend-mode: screen
+          opacity: '${states[''switch.luzes_da_sala_switch_2''] && states[''switch.luzes_da_sala_switch_2''].state
+            === ''on'' ? 1 : 0}'
+      - type: image
+        image: /local/planta3d/planta-fixa-transparente/luz_cozinha.png
+        style:
+          left: 50%
+          top: 50%
+          width: 100%
+          pointer-events: none
+          mix-blend-mode: screen
+          opacity: '${states[''light.luz_da_cozinha''] && states[''light.luz_da_cozinha''].state === ''on''
+            ? 1 : 0}'
+      - type: image
+        image: /local/planta3d/planta-fixa-transparente/luz_corredor.png
+        style:
+          left: 50%
+          top: 50%
+          width: 100%
+          pointer-events: none
+          mix-blend-mode: screen
+          opacity: '${states[''switch.luz_do_corredor_switch_1''] && states[''switch.luz_do_corredor_switch_1''].state
+            === ''on'' ? 1 : 0}'
+      - type: image
+        image: /local/planta3d/planta-fixa-transparente/luz_quarto.png
+        style:
+          left: 50%
+          top: 50%
+          width: 100%
+          pointer-events: none
+          mix-blend-mode: screen
+          opacity: '${states[''light.luz_do_quarto''] && states[''light.luz_do_quarto''].state === ''on''
+            ? (states[''light.luz_do_quarto''].attributes.brightness == null ? 1 : Math.max(0, Math.min(1,
+            states[''light.luz_do_quarto''].attributes.brightness / 255))) : 0}'
+          filter: '${states[''light.luz_do_quarto''] && states[''light.luz_do_quarto''].attributes.hs_color
+            ? ''hue-rotate('' + (states[''light.luz_do_quarto''].attributes.hs_color[0] - 40) + ''deg)
+            saturate('' + Math.max(0, states[''light.luz_do_quarto''].attributes.hs_color[1]) + ''%)''
+            : ''none''}'
+      - type: image
+        image: /local/planta3d/planta-fixa-transparente/luz_quarto_1.png
+        style:
+          left: 50%
+          top: 50%
+          width: 100%
+          pointer-events: none
+          mix-blend-mode: screen
+          opacity: '${states[''input_boolean.luz_virtual_quarto_1''] && states[''input_boolean.luz_virtual_quarto_1''].state
+            === ''on'' ? 1 : 0}'
+      - type: image
+        image: /local/planta3d/planta-fixa-transparente/tv_sala.png
+        style:
+          left: 50%
+          top: 50%
+          width: 100%
+          pointer-events: none
+          mix-blend-mode: screen
+          opacity: '${states[''media_player.tv_samsung''] && [''on'', ''playing'', ''paused'', ''idle'',
+            ''buffering''].includes(states[''media_player.tv_samsung''].state) ? 1 : 0}'
+      - type: image
+        image: /local/planta3d/planta-fixa-transparente/tv_quarto.png
+        style:
+          left: 50%
+          top: 50%
+          width: 100%
+          pointer-events: none
+          mix-blend-mode: screen
+          opacity: '${states[''media_player.aoc_h302x_44b3''] && [''on'', ''playing'', ''paused'', ''idle'',
+            ''buffering''].includes(states[''media_player.aoc_h302x_44b3''].state) ? 1 : 0}'
+      - type: state-icon
+        entity: switch.luzes_da_sala_switch_1
+        title: Sala de estar
+        icon: mdi:ceiling-light
+        style:
+          top: 37.42%
+          left: 75.21%
+          transform: translate(-50%, -50%)
+          border-radius: 50%
+          background: radial-gradient(circle, rgba(20, 24, 31, 0.70) 0 14px, transparent 15px)
+          padding: 0px
+          --paper-item-icon-color: '#d6d6d6'
+          --paper-item-icon-active-color: '#ffd16b'
+          --mdc-icon-size: 18px
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+      - type: state-icon
+        entity: switch.luzes_da_sala_switch_2
+        title: Sala de jantar
+        icon: mdi:ceiling-light
+        style:
+          top: 29.8%
+          left: 66.65%
+          transform: translate(-50%, -50%)
+          border-radius: 50%
+          background: radial-gradient(circle, rgba(20, 24, 31, 0.70) 0 14px, transparent 15px)
+          padding: 0px
+          --paper-item-icon-color: '#d6d6d6'
+          --paper-item-icon-active-color: '#ffd16b'
+          --mdc-icon-size: 18px
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+      - type: state-icon
+        entity: light.luz_da_cozinha
+        title: Cozinha
+        icon: mdi:ceiling-light
+        style:
+          top: 22.15%
+          left: 44.78%
+          transform: translate(-50%, -50%)
+          border-radius: 50%
+          background: radial-gradient(circle, rgba(20, 24, 31, 0.70) 0 14px, transparent 15px)
+          padding: 0px
+          --paper-item-icon-color: '#d6d6d6'
+          --paper-item-icon-active-color: '#ffd16b'
+          --mdc-icon-size: 18px
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+      - type: state-icon
+        entity: switch.luz_do_corredor_switch_1
+        title: Corredor
+        icon: mdi:ceiling-light
+        style:
+          top: 37.71%
+          left: 45.62%
+          transform: translate(-50%, -50%)
+          border-radius: 50%
+          background: radial-gradient(circle, rgba(20, 24, 31, 0.70) 0 14px, transparent 15px)
+          padding: 0px
+          --paper-item-icon-color: '#d6d6d6'
+          --paper-item-icon-active-color: '#ffd16b'
+          --mdc-icon-size: 18px
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+      - type: state-icon
+        entity: light.luz_do_quarto
+        title: Seu quarto
+        icon: mdi:ceiling-light
+        style:
+          top: 50.69%
+          left: 52.93%
+          transform: translate(-50%, -50%)
+          border-radius: 50%
+          background: radial-gradient(circle, rgba(20, 24, 31, 0.70) 0 14px, transparent 15px)
+          padding: 0px
+          --paper-item-icon-color: '#d6d6d6'
+          --paper-item-icon-active-color: '#ffd16b'
+          --mdc-icon-size: 18px
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        double_tap_action:
+          action: more-info
+      - type: state-icon
+        entity: input_boolean.luz_virtual_quarto_1
+        title: Luz virtual do outro quarto
+        icon: mdi:lightbulb-outline
+        style:
+          top: 31.25%
+          left: 27.19%
+          transform: translate(-50%, -50%)
+          border-radius: 50%
+          background: radial-gradient(circle, rgba(20, 24, 31, 0.70) 0 14px, transparent 15px)
+          padding: 0px
+          --paper-item-icon-color: '#d6d6d6'
+          --paper-item-icon-active-color: '#ffd16b'
+          --mdc-icon-size: 18px
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+      - type: state-icon
+        entity: media_player.tv_samsung
+        title: TV da sala
+        icon: mdi:television
+        style:
+          top: 44.1%
+          left: 83.57%
+          transform: translate(-50%, -50%)
+          border-radius: 50%
+          background: radial-gradient(circle, rgba(20, 24, 31, 0.70) 0 14px, transparent 15px)
+          padding: 0px
+          --paper-item-icon-color: '#d6d6d6'
+          --paper-item-icon-active-color: '#ffd16b'
+          --mdc-icon-size: 18px
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+      - type: state-icon
+        entity: media_player.aoc_h302x_44b3
+        title: TV do quarto
+        icon: mdi:television
+        style:
+          top: 50.09%
+          left: 45.43%
+          transform: translate(-50%, -50%)
+          border-radius: 50%
+          background: radial-gradient(circle, rgba(20, 24, 31, 0.70) 0 14px, transparent 15px)
+          padding: 0px
+          --paper-item-icon-color: '#d6d6d6'
+          --paper-item-icon-active-color: '#ffd16b'
+          --mdc-icon-size: 18px
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+  grid_options:
+    rows: auto
+    columns: full
+grid_options:
+  rows: auto
+  columns: full
